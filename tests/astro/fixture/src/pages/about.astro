@@ -1,0 +1,12 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="About">
+  <h1>About</h1>
+  <script>
+    import { arrival } from "pageturn/core";
+
+    document.documentElement.dataset.moduleSaw = JSON.stringify(arrival());
+  </script>
+</Base>

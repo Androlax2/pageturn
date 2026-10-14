@@ -1,0 +1,70 @@
+/*
+ * The default move, "page". The fallback rules play in every browser that gets the
+ * protocol; the native block between the two markers is removed to build no-native.css.
+ * Its look comes from four custom properties a site may set on :root:
+ * --turn-leave-duration, --turn-arrive-duration, --turn-easing, --turn-shift.
+ *
+ * Specificity is kept low, so a site's own html[data-turn-arriving="page"] main wins.
+ * A page is never arriving and leaving at once: the leave ends the arrival.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  /* native:start */
+  @view-transition {
+    navigation: auto;
+  }
+
+  /* The marker pageturn/native reads: this stylesheet has the native rendering. */
+  :root {
+    --pageturn-native: 1;
+  }
+
+  :where(html:not(:has([data-turn-root])) main, [data-turn-root]) {
+    view-transition-name: pageturn-root;
+  }
+
+  /* The rest of the page changes at once, as it does in the fallback. */
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  ::view-transition-group(pageturn-root) {
+    animation: none;
+  }
+
+  ::view-transition-old(pageturn-root) {
+    animation: pageturn-leave var(--turn-leave-duration, 200ms)
+      var(--turn-easing, cubic-bezier(0.2, 0, 0, 1)) both;
+  }
+
+  /* After the leave, as the fallback plays out, then in. */
+  ::view-transition-new(pageturn-root) {
+    animation: pageturn-arrive var(--turn-arrive-duration, 280ms)
+      var(--turn-easing, cubic-bezier(0.2, 0, 0, 1))
+      var(--turn-leave-duration, 200ms) both;
+  }
+  /* native:end */
+
+  [data-turn-arriving="page"]
+  :where(html:not(:has([data-turn-root])) main, [data-turn-root]) {
+    animation: pageturn-arrive var(--turn-arrive-duration, 280ms)
+      var(--turn-easing, cubic-bezier(0.2, 0, 0, 1)) both;
+  }
+
+  [data-turn-leaving="page"]
+    :where(html:not(:has([data-turn-root])) main, [data-turn-root]) {
+    animation: pageturn-leave var(--turn-leave-duration, 200ms)
+      var(--turn-easing, cubic-bezier(0.2, 0, 0, 1)) both;
+  }
+}
+
+@keyframes pageturn-leave {
+  to {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--turn-shift, 8px)));
+  }
+}
+
+@keyframes pageturn-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(var(--turn-shift, 8px));
+  }
+}

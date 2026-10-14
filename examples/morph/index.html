@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop · a morph from the markup</title>
+  <link rel="stylesheet" href="/examples/style.css">
+  <link rel="stylesheet" href="/dist/no-native.css">
+  <script src="/dist/pageturn.js"></script>
+  <!-- The morph: data-turn-morph in the markup is all it reads. -->
+  <script src="/dist/pageturn-morph.js"></script>
+  <style>
+    html[data-turn-leaving="product"] main { animation: fade 0.3s both; }
+    html[data-turn-arriving="product-back"] .card span { animation: rise 0.4s 0.2s both; }
+    @keyframes fade { to { opacity: 0; } }
+    @keyframes rise { from { opacity: 0; } }
+  </style>
+</head>
+<body>
+  <header class="bar"><strong>Hearth</strong><nav><span>Shop</span></nav></header>
+  <main>
+    <h1>The shop</h1>
+    <p class="lead">Each picture grows into its product page, and shrinks back into its
+      place on Back.</p>
+    <div class="grid">
+      <a class="card" href="/examples/morph/chair.html"><img data-turn-morph="product" src="/examples/media/chair.svg" alt=""><span>Oak chair <small>€320</small></span></a>
+      <a class="card" href="/examples/morph/lamp.html"><img data-turn-morph="product" src="/examples/media/lamp.svg" alt=""><span>Brass lamp <small>€180</small></span></a>
+      <a class="card" href="/examples/morph/vase.html"><img data-turn-morph="product" src="/examples/media/vase.svg" alt=""><span>Stone vase <small>€90</small></span></a>
+      <a class="card" href="/examples/morph/plant.html"><img data-turn-morph="product" src="/examples/media/plant.svg" alt=""><span>Fig tree <small>€60</small></span></a>
+    </div>
+  </main>
+</body>
+</html>

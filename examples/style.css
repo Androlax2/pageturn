@@ -1,0 +1,153 @@
+/* The examples' own look: nothing of it is pageturn's, which needs none. */
+:root {
+  --ink: #1d1b20;
+  --muted: #6b6672;
+  --paper: #fbfaf8;
+  --line: #e7e3df;
+  --accent: #3b5bdb;
+  color-scheme: light;
+  font:
+    16px / 1.5 system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+a {
+  color: inherit;
+}
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 18px 40px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--paper) 85%, transparent);
+  backdrop-filter: blur(8px);
+}
+.bar strong {
+  margin-right: auto;
+  letter-spacing: -0.01em;
+}
+.bar a {
+  text-decoration: none;
+  color: var(--muted);
+}
+.bar a[aria-current] {
+  color: var(--ink);
+  font-weight: 600;
+}
+main {
+  display: block;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 56px 40px 80px;
+}
+h1 {
+  margin: 0 0 12px;
+  font-size: 48px;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+.lead {
+  margin: 0 0 40px;
+  max-width: 34em;
+  color: var(--muted);
+  font-size: 19px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+}
+.card {
+  display: block;
+  text-decoration: none;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--line);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.08);
+}
+.card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+.card span {
+  display: block;
+  padding: 14px 16px;
+  font-weight: 600;
+}
+.card small {
+  display: block;
+  padding: 0 16px 16px;
+  color: var(--muted);
+}
+.button {
+  display: inline-block;
+  padding: 14px 26px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+.split {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+.hero {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 28px;
+  object-fit: cover;
+}
+.back {
+  display: inline-block;
+  margin-bottom: 24px;
+  color: var(--muted);
+  text-decoration: none;
+}
+.price {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 8px 0 24px;
+}
+p {
+  max-width: 36em;
+}
+@media (max-width: 720px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+  h1 {
+    font-size: 36px;
+  }
+  main {
+    padding: 40px 20px;
+  }
+  .bar {
+    padding: 14px 20px;
+  }
+}

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home · the default move</title>
+  <link rel="stylesheet" href="/examples/style.css">
+  <!-- The default move, natively where the browser can, by pageturn elsewhere. -->
+  <link rel="stylesheet" href="/dist/pageturn.css">
+  <!-- In the head, not deferred: it marks the page before its first frame. -->
+  <script src="/dist/pageturn.js"></script>
+  <style>
+    /* The page's own entrance, the first time it is shown: not after a move, not by Back. */
+    @media (prefers-reduced-motion: no-preference) {
+      html[data-turn-entering]:not([data-turn-arriving]) main > * {
+        animation: rise 0.7s cubic-bezier(0.2, 0, 0, 1) both;
+      }
+      html[data-turn-entering]:not([data-turn-arriving]) main > :nth-child(2) { animation-delay: 0.08s; }
+      html[data-turn-entering]:not([data-turn-arriving]) main > :nth-child(3) { animation-delay: 0.16s; }
+    }
+    @keyframes rise { from { opacity: 0; transform: translateY(18px); } }
+  </style>
+</head>
+<body>
+  <header class="bar">
+    <strong>Northwind</strong>
+    <nav><a href="/examples/default/" aria-current="page">Home</a> · <a href="/examples/default/about.html">About</a></nav>
+  </header>
+  <main>
+    <h1>Real pages,<br>moving like an app.</h1>
+    <p class="lead">Every link to another page of the site plays a short leave and arrival. The
+      navigation is a real one: no router, no swapped DOM.</p>
+    <a class="button" href="/examples/default/about.html">About us</a>
+  </main>
+</body>
+</html>

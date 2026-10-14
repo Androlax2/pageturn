@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Colours · a move that carries data</title>
+  <link rel="stylesheet" href="/examples/style.css">
+  <link rel="stylesheet" href="/dist/no-native.css">
+  <script src="/dist/pageturn.js"></script>
+  <style>
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+    .swatches a {
+      aspect-ratio: 1; border-radius: 24px; display: flex; align-items: end; padding: 18px;
+      color: #fff; font-weight: 650; text-decoration: none; background: var(--tint);
+    }
+    /* The page left fills with the colour clicked, from the click. */
+    html[data-turn-leaving="tint"]::after {
+      content: ""; position: fixed; inset: 0; z-index: 2; background: var(--tint);
+      clip-path: circle(0 at var(--x) var(--y));
+      animation: flood 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes flood { to { clip-path: circle(150% at var(--x) var(--y)); } }
+  </style>
+  <script>
+    // The same move would usually live in a module shared by both pages.
+    pageturn.defineMove("tint", {
+      match: ({ link }) => link.matches(".swatches a"),
+      async leave(turn) {
+        const tint = getComputedStyle(turn.link).getPropertyValue("--tint");
+        const { left, top, width, height } = turn.link.getBoundingClientRect();
+        const root = document.documentElement.style;
+        root.setProperty("--tint", tint);
+        root.setProperty("--x", `${left + width / 2}px`);
+        root.setProperty("--y", `${top + height / 2}px`);
+        await turn.leaving(); // plays the CSS above, resolves when it has ended
+        return { data: { tint, light: tint === "#ffd43b" } };
+      },
+    });
+  </script>
+</head>
+<body>
+  <header class="bar"><strong>Palette</strong><nav><span>Colours</span></nav></header>
+  <main>
+    <h1>Pick a colour</h1>
+    <p class="lead">The colour clicked floods the page, and the next page arrives in it:
+      the move hands it over as data.</p>
+    <div class="swatches">
+      <a href="/examples/data/colour.html?name=Ultramarine" style="--tint: #3b5bdb">Ultramarine</a>
+      <a href="/examples/data/colour.html?name=Teal" style="--tint: #0c8599">Teal</a>
+      <a href="/examples/data/colour.html?name=Coral" style="--tint: #f76707">Coral</a>
+      <a href="/examples/data/colour.html?name=Sun" style="--tint: #ffd43b">Sun</a>
+    </div>
+  </main>
+</body>
+</html>

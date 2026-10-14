@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Studio · words that become a title</title>
+  <link rel="stylesheet" href="/examples/style.css">
+  <link rel="stylesheet" href="/dist/no-native.css">
+  <script src="/dist/pageturn.js"></script>
+  <script src="/dist/pageturn-morph.js"></script>
+  <script src="/examples/text/contact-morph.js"></script>
+  <style>
+    html[data-turn-leaving="contact"] main > :not(.cta) { animation: fade 0.3s both; }
+    html[data-turn-arriving="contact-back"] main > :not(.cta) { animation: rise 0.4s 0.3s both; }
+    @keyframes fade { to { opacity: 0; } }
+    @keyframes rise { from { opacity: 0; } }
+    .cta { margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header class="bar"><strong>Studio Ostra</strong><nav><span>Home</span></nav></header>
+  <main>
+    <h1>We design quiet,<br>useful things.</h1>
+    <p class="lead">The button's words become the next page's title, and close back into
+      the button on Back.</p>
+    <div class="cta"><a class="button" href="/examples/text/contact.html">Speak to us</a></div>
+  </main>
+</body>
+</html>

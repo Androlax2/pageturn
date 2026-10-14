@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fig tree · a morph from the markup</title>
+  <link rel="stylesheet" href="/examples/style.css">
+  <link rel="stylesheet" href="/dist/no-native.css">
+  <script src="/dist/pageturn.js"></script>
+  <script src="/dist/pageturn-morph.js"></script>
+  <style>
+    html[data-turn-arriving="product"] .details > * { animation: rise 0.5s 0.25s cubic-bezier(0.2, 0, 0, 1) both; }
+    html[data-turn-leaving="product-back"] .details { animation: fade 0.25s both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(16px); } }
+    @keyframes fade { to { opacity: 0; } }
+  </style>
+</head>
+<body>
+  <header class="bar"><strong>Hearth</strong><nav><a href="/examples/morph/">Shop</a></nav></header>
+  <main class="split">
+    <img class="hero" data-turn-morph="product" src="/examples/media/plant.svg" alt="Fig tree">
+    <div class="details">
+      <h1>Fig tree</h1>
+      <p class="price">€60</p>
+      <p class="lead">A fiddle-leaf fig, two years old, in its clay pot.</p>
+      <a class="back" href="/examples/morph/">← The shop</a>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <title>vase</title>
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3efe6"/><stop offset="1" stop-color="#bcd9c3"/></linearGradient></defs>
+  <rect width="600" height="600" fill="url(#g)"/>
+  <ellipse cx="300" cy="470" rx="190" ry="26" fill="#000" opacity="0.08"/>
+  <path d="M260 160 q-50 120 0 260 h80 q50-140 0-260z" fill="#2f7d5b"/>
+  <rect x="262" y="140" width="76" height="26" rx="8" fill="#256449"/>
+  <path d="M300 140 q-40-60 -10-110 M300 140 q30-50 70-70 M300 140 q-60-30 -90-10" stroke="#3a6b3f" stroke-width="8" fill="none"/>
+</svg>

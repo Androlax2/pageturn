@@ -1,0 +1,32 @@
+---
+import PageturnHead from "pageturn/astro/Head.astro";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const isManual = import.meta.env.PAGETURN_HEAD === "manual";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{title}</title>
+    {isManual && <PageturnHead />}
+    <!-- The site's own inline script: it must run after the package's head script. -->
+    <script is:inline>
+      document.documentElement.dataset.siteSaw = window.pageturn
+        ? JSON.stringify(window.pageturn.arrival)
+        : "no head script yet";
+    </script>
+  </head>
+  <body>
+    <nav>
+      <a id="to-home" href={base}>Home</a>
+      <a id="to-about" href={`${base}about/`}>About</a>
+    </nav>
+    <main><slot /></main>
+  </body>
+</html>

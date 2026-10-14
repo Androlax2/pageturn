@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Work · a named move</title>
+  <link rel="stylesheet" href="/examples/style.css">
+  <link rel="stylesheet" href="/dist/no-native.css">
+  <script src="/dist/pageturn.js"></script>
+  <style>
+    .work { display: grid; gap: 12px; }
+    .work a {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 28px; border-radius: 18px; text-decoration: none; color: #fff;
+      font-size: 22px; font-weight: 650; letter-spacing: -0.02em;
+    }
+    .work small { font-size: 15px; font-weight: 500; opacity: 0.8; }
+    /* The move named "project": two CSS rules, and no JavaScript. */
+    @media (prefers-reduced-motion: no-preference) {
+      html[data-turn-leaving="project"] main { animation: sink 0.35s cubic-bezier(0.4, 0, 1, 1) both; }
+    }
+    @keyframes sink { to { opacity: 0; transform: scale(0.96); } }
+  </style>
+</head>
+<body>
+  <header class="bar"><strong>Studio Ostra</strong><nav><span>Selected work</span></nav></header>
+  <main>
+    <h1>Selected work</h1>
+    <p class="lead">Each project opens with its own move, named on the link.</p>
+    <div class="work">
+      <a href="/examples/named/atlas.html" data-turn="project" style="background: #364fc7">Atlas <small>Identity, 2026</small></a>
+      <a href="/examples/named/tide.html" data-turn="project" style="background: #0b7285">Tide <small>Website, 2025</small></a>
+      <!-- data-turn="none": this one navigates plainly. -->
+      <a href="/examples/named/tide.html" data-turn="none" style="background: #868e96">Tide, with no move <small>data-turn="none"</small></a>
+    </div>
+  </main>
+</body>
+</html>

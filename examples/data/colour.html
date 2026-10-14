@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A colour · a move that carries data</title>
+  <link rel="stylesheet" href="/examples/style.css">
+  <link rel="stylesheet" href="/dist/no-native.css">
+  <script src="/dist/pageturn.js"></script>
+  <style>
+    /*
+     * data: { tint, light } arrives as --turn-tint on <html>, and light, when true, as a
+     * word of data-turn-with. Both last as long as the arrival.
+     */
+    html[data-turn-arriving="tint"] { background: var(--turn-tint); animation: settle 0.6s 0.1s both; }
+    html[data-turn-arriving="tint"] main { animation: rise 0.5s 0.15s cubic-bezier(0.2, 0, 0, 1) both; }
+    html[data-turn-arriving="tint"]:not([data-turn-with~="light"]) .bar { color: #fff; }
+    @keyframes settle { to { background: var(--paper); } }
+    @keyframes rise { from { opacity: 0; transform: translateY(24px); } }
+  </style>
+</head>
+<body>
+  <header class="bar"><strong>Palette</strong><nav><a href="/examples/data/">All colours</a></nav></header>
+  <main>
+    <h1 id="name">A colour</h1>
+    <p class="lead">This page knew nothing of the colour before it arrived: it came with the
+      move, as <code>--turn-tint</code>.</p>
+    <a class="back" href="/examples/data/">← All colours</a>
+  </main>
+  <script>
+    document.getElementById("name").textContent =
+      new URLSearchParams(location.search).get("name") ?? "A colour";
+  </script>
+</body>
+</html>

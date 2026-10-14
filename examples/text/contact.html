@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact · words that become a title</title>
+  <link rel="stylesheet" href="/examples/style.css">
+  <link rel="stylesheet" href="/dist/no-native.css">
+  <script src="/dist/pageturn.js"></script>
+  <script src="/dist/pageturn-morph.js"></script>
+  <script src="/examples/text/contact-morph.js"></script>
+  <style>
+    form { display: grid; gap: 14px; max-width: 520px; }
+    form .button { justify-self: start; border: 0; font: inherit; font-weight: 600; cursor: pointer; }
+    input, textarea { font: inherit; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+    html[data-turn-arriving="contact"] form { animation: rise 0.5s 0.35s cubic-bezier(0.2, 0, 0, 1) both; }
+    html[data-turn-leaving="contact-back"] form { animation: fade 0.25s both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(20px); } }
+    @keyframes fade { to { opacity: 0; } }
+  </style>
+</head>
+<body>
+  <header class="bar"><strong>Studio Ostra</strong><nav><a href="/examples/text/">Home</a></nav></header>
+  <main>
+    <h1 class="title">Speak to us</h1>
+    <form onsubmit="return false">
+      <input placeholder="Your name" aria-label="Your name">
+      <textarea rows="5" placeholder="What are you making?" aria-label="Message"></textarea>
+      <button class="button" type="submit">Send</button>
+    </form>
+  </main>
+</body>
+</html>

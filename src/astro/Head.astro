@@ -1,0 +1,13 @@
+---
+/**
+ * The head script, for pageturn({ head: "manual" }). Render it first in <head>, before
+ * any inline script of the site's that reads window.pageturn.arrival. Needs the
+ * integration, which picks the head script its options call for, with its morph half on
+ * the pages `morph` names.
+ */
+import { headFor } from "virtual:pageturn/head";
+
+const headScript = headFor(Astro.url.pathname);
+---
+
+<script is:inline set:html={headScript} />

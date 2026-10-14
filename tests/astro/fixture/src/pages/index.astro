@@ -1,0 +1,20 @@
+---
+import Base from "../layouts/Base.astro";
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+---
+
+<Base title="Home">
+  <h1>Home</h1>
+  <a id="card" href={`${base}about/`} data-turn="card">A card</a>
+  <script>
+    import { defineMove } from "pageturn/core";
+
+    defineMove("card", {
+      async leave(turn) {
+        await turn.leaving();
+        return { data: { from: "astro" } };
+      },
+    });
+  </script>
+</Base>

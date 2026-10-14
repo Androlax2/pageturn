@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tide · a named move</title>
+  <link rel="stylesheet" href="/examples/style.css">
+  <link rel="stylesheet" href="/dist/no-native.css">
+  <script src="/dist/pageturn.js"></script>
+  <style>
+    .band { height: 120px; border-radius: 24px; margin-bottom: 28px; background: #0b7285; transform-origin: top; }
+    /* Arriving by "project": the band unrolls, then the text rises. */
+    @media (prefers-reduced-motion: no-preference) {
+      html[data-turn-arriving="project"] .band { animation: unroll 0.6s cubic-bezier(0.2, 0, 0, 1) both; }
+      html[data-turn-arriving="project"] .text { animation: rise 0.5s 0.2s cubic-bezier(0.2, 0, 0, 1) both; }
+    }
+    @keyframes unroll { from { transform: scaleY(0.2); opacity: 0; } }
+    @keyframes rise { from { opacity: 0; transform: translateY(18px); } }
+  </style>
+</head>
+<body>
+  <header class="bar"><strong>Studio Ostra</strong><nav><a href="/examples/named/">Selected work</a></nav></header>
+  <main>
+    <div class="band"></div>
+    <div class="text">
+      <h1>Tide</h1>
+      <p class="lead">A website for a surf school, built around the day's tides and the next good session.</p>
+      <a class="back" href="/examples/named/">← All work</a>
+    </div>
+  </main>
+</body>
+</html>

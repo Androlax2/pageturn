@@ -1,0 +1,20 @@
+node_modules/
+.pnpm-store/
+dist/
+*.tgz
+
+# Test output
+test-results/
+playwright-report/
+tests/astro/fixture/dist-*/
+tests/astro/fixture/node_modules/
+tests/astro/fixture/.astro/
+
+# Editors and local tools
+.idea/
+.vscode/
+.DS_Store
+.claude/settings.local.json
+
+# Local notes kept out of the repository
+.archive/

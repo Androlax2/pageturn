@@ -1,0 +1,115 @@
+{
+  "name": "pageturn",
+  "version": "0.0.0",
+  "description": "Page transitions between real page loads, the same in every browser.",
+  "license": "MIT",
+  "author": "Théo Benoit",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Androlax2/pageturn.git"
+  },
+  "homepage": "https://github.com/Androlax2/pageturn#readme",
+  "bugs": "https://github.com/Androlax2/pageturn/issues",
+  "keywords": [
+    "page transitions",
+    "view transitions",
+    "navigation",
+    "astro-integration",
+    "mpa"
+  ],
+  "type": "module",
+  "packageManager": "pnpm@11.28.4",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "biome check --error-on-warnings . && tsc --noEmit",
+    "format": "biome check --write .",
+    "test": "pnpm run build && node tests/astro/fixture/build.mjs && playwright test",
+    "size": "pnpm run build && node scripts/size.mjs",
+    "examples": "pnpm run build && node tests/support/server.mjs",
+    "record": "pnpm run build && node scripts/record.mjs",
+    "lint:package": "publint --strict && attw --pack . --profile esm-only --exclude-entrypoints ./astro/Head.astro ./pageturn.css ./no-native.css ./pageturn.js ./pageturn-morph.js ./morph-head.js",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm run build && pnpm run lint:package && changeset publish",
+    "prepack": "node scripts/build.mjs"
+  },
+  "sideEffects": true,
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/types/kernel/core.d.ts",
+      "default": "./dist/core.js"
+    },
+    "./prefetch": {
+      "types": "./dist/types/prefetch/prefetch.d.ts",
+      "default": "./dist/prefetch.js"
+    },
+    "./native": {
+      "types": "./dist/types/default-move/native.d.ts",
+      "default": "./dist/native.js"
+    },
+    "./astro": {
+      "types": "./dist/types/astro/integration.d.ts",
+      "default": "./dist/astro.js"
+    },
+    "./astro/Head.astro": "./dist/Head.astro",
+    "./head": {
+      "types": "./dist/head-string.d.ts",
+      "default": "./dist/head-string.js"
+    },
+    "./morph": {
+      "types": "./dist/types/morph/index.d.ts",
+      "default": "./dist/morph.js"
+    },
+    "./morph/markup": {
+      "types": "./dist/types/morph/markup.d.ts",
+      "default": "./dist/morph-markup.js"
+    },
+    "./testing": {
+      "types": "./dist/types/testing/testing.d.ts",
+      "default": "./dist/testing.js"
+    },
+    "./router": {
+      "types": "./dist/types/router/router.d.ts",
+      "default": "./dist/router.js"
+    },
+    "./morph-head.js": "./dist/morph-head.js",
+    "./pageturn.css": "./dist/pageturn.css",
+    "./no-native.css": "./dist/no-native.css",
+    "./pageturn.js": "./dist/pageturn.js",
+    "./pageturn-morph.js": "./dist/pageturn-morph.js"
+  },
+  "peerDependencies": {
+    "astro": ">=7"
+  },
+  "peerDependenciesMeta": {
+    "astro": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@biomejs/biome": "2.5.15",
+    "@changesets/cli": "^3.0.3",
+    "@playwright/test": "1.64.0",
+    "@types/node": "^26.6.5",
+    "astro": "7.3.8",
+    "esbuild": "0.28.2",
+    "publint": "^0.3.25",
+    "typescript": "^6.0.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}
