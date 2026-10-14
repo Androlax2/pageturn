@@ -305,76 +305,82 @@ test.describe("the core", () => {
     ).toEqual({ sources: 0, srcset: null, hasFile: true });
   });
 
-  test("with its files held, the layer still shows what the page had drawn, and does not wait", async ({
-    page,
-    context,
-  }) => {
-    // Routing switches the browser's cache off: the layer's copy asks for its file again.
-    let isHeld = false;
-    const requested: string[] = [];
-    await context.route("**/held/*.svg", async (route) => {
-      requested.push(new URL(route.request().url()).pathname);
-      if (isHeld) await new Promise((resolve) => setTimeout(resolve, 700));
-      const fill = route.request().url().includes("large") ? "navy" : "teal";
-      await route.fulfill({
-        contentType: "image/svg+xml",
-        body: `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60"><rect width="120" height="60" fill="${fill}"/></svg>`,
-      });
-    });
-    const files = `src="/held/small.svg" srcset="/held/small.svg 120w, /held/large.svg 480w"`;
-    const card = `<a id="card" href="/t/product" style="position: absolute; left: 20px; top: 40px; display: block; width: 120px"><img id="thumb" alt="" ${files} sizes="120px" loading="lazy" decoding="async" style="display: block; width: 120px; height: 60px"></a>`;
-    await serve(
+  test.describe("at one device pixel per CSS pixel", () => {
+    // At two (Playwright's Safari), the thumbnail draws the large file already, and the
+    // copy finds it in memory: there is no held file to show the layer does not wait for.
+    test.use({ deviceScaleFactor: 1 });
+
+    test("with its files held, the layer still shows what the page had drawn, and does not wait", async ({
+      page,
       context,
-      shop({
-        // Long enough for the held file to come before the page changes.
-        options: `find: () => (${HERO_END}), duration: 1500,
-          during({ layer, content }) {
-            const shot = layer.querySelector("canvas");
-            note("at the start", {
-              after: Math.round(performance.now() - window.clickedAt),
-              copyHasDrawn: content.complete && content.naturalWidth > 0,
-              // The middle of what the page had drawn, on the layer.
-              shot: shot && [...shot.getContext("2d").getImageData(shot.width / 2, shot.height / 2, 1, 1).data],
-              thumbnail: getComputedStyle(document.getElementById("thumb")).visibility,
-            });
-            content.addEventListener("load", () => setTimeout(() =>
-              note("once drawn", { shots: layer.querySelectorAll("canvas").length, file: content.currentSrc.split("/").pop() }), 100));
-          },`,
-        list: {
-          kernel: "core",
-          sheet: "none",
-          body: card,
-          script: `addEventListener("click", () => { window.clickedAt = performance.now(); }, true);`,
-        },
-        product: { stays: true },
-      }),
-    );
-    await page.goto("/t/list");
-    await ready(page);
-    await page.waitForFunction(
-      () => (document.getElementById("thumb") as HTMLImageElement).complete,
-    );
-    isHeld = true;
-    await page.evaluate(() => document.getElementById("card")?.click());
-    await expect
-      .poll(() => noted(page, "/t/list", "at the start"))
-      .toBeDefined();
-    const start = (await noted(page, "/t/list", "at the start")) as {
-      after: number;
-    };
-    // Nothing of the copy has come, the thumbnail is hidden, and its picture is there.
-    expect(start).toMatchObject({
-      copyHasDrawn: false,
-      shot: [0, 128, 128, 255],
-      thumbnail: "hidden",
+    }) => {
+      // Routing switches the browser's cache off: the layer's copy asks for its file again.
+      let isHeld = false;
+      const requested: string[] = [];
+      await context.route("**/held/*.svg", async (route) => {
+        requested.push(new URL(route.request().url()).pathname);
+        if (isHeld) await new Promise((resolve) => setTimeout(resolve, 700));
+        const fill = route.request().url().includes("large") ? "navy" : "teal";
+        await route.fulfill({
+          contentType: "image/svg+xml",
+          body: `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60"><rect width="120" height="60" fill="${fill}"/></svg>`,
+        });
+      });
+      const files = `src="/held/small.svg" srcset="/held/small.svg 120w, /held/large.svg 480w"`;
+      const card = `<a id="card" href="/t/product" style="position: absolute; left: 20px; top: 40px; display: block; width: 120px"><img id="thumb" alt="" ${files} sizes="120px" loading="lazy" decoding="async" style="display: block; width: 120px; height: 60px"></a>`;
+      await serve(
+        context,
+        shop({
+          // Long enough for the held file to come before the page changes.
+          options: `find: () => (${HERO_END}), duration: 1500,
+            during({ layer, content }) {
+              const shot = layer.querySelector("canvas");
+              note("at the start", {
+                after: Math.round(performance.now() - window.clickedAt),
+                copyHasDrawn: content.complete && content.naturalWidth > 0,
+                // The middle of what the page had drawn, on the layer.
+                shot: shot && [...shot.getContext("2d").getImageData(shot.width / 2, shot.height / 2, 1, 1).data],
+                thumbnail: getComputedStyle(document.getElementById("thumb")).visibility,
+              });
+              content.addEventListener("load", () => setTimeout(() =>
+                note("once drawn", { shots: layer.querySelectorAll("canvas").length, file: content.currentSrc.split("/").pop() }), 100));
+            },`,
+          list: {
+            kernel: "core",
+            sheet: "none",
+            body: card,
+            script: `addEventListener("click", () => { window.clickedAt = performance.now(); }, true);`,
+          },
+          product: { stays: true },
+        }),
+      );
+      await page.goto("/t/list");
+      await ready(page);
+      await page.waitForFunction(
+        () => (document.getElementById("thumb") as HTMLImageElement).complete,
+      );
+      isHeld = true;
+      await page.evaluate(() => document.getElementById("card")?.click());
+      await expect
+        .poll(() => noted(page, "/t/list", "at the start"))
+        .toBeDefined();
+      const start = (await noted(page, "/t/list", "at the start")) as {
+        after: number;
+      };
+      // Nothing of the copy has come, the thumbnail is hidden, and its picture is there.
+      expect(start).toMatchObject({
+        copyHasDrawn: false,
+        shot: [0, 128, 128, 255],
+        thumbnail: "hidden",
+      });
+      // The travel does not wait for a file: it starts at the click.
+      expect(start.after).toBeLessThan(150);
+      // Then the file its place needs comes, and what stood in for it goes.
+      await expect
+        .poll(() => noted(page, "/t/list", "once drawn"))
+        .toEqual({ shots: 0, file: "large.svg" });
+      expect(requested).toContain("/held/large.svg");
     });
-    // The travel does not wait for a file: it starts at the click.
-    expect(start.after).toBeLessThan(150);
-    // Then the file its place needs comes, and what stood in for it goes.
-    await expect
-      .poll(() => noted(page, "/t/list", "once drawn"))
-      .toEqual({ shots: 0, file: "large.svg" });
-    expect(requested).toContain("/held/large.svg");
   });
 
   test("arriveAs names the arrival: two morphs can land on a page and share it", async ({

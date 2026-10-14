@@ -88,6 +88,12 @@ On a site using `pageturn/morph`, in **Firefox, Chrome and Safari**:
 - [ ] A dialog, a popover or a menu open as the link is clicked: the layer is above it.
 - [ ] `prefers-reduced-motion`: no layer, no hidden element, normal navigation.
 
+## Shown anew
+
+- [ ] In Safari (Playwright's WebKit does not put the scroll back on a reload): a long
+      page scrolled down and reloaded shows no entrance, and is drawn scrolled from its
+      first frame.
+
 ## By eye
 
 - [ ] The default move with `pageturn.css` in Chrome and Safari looks close to the same

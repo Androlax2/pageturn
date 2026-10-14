@@ -222,7 +222,12 @@ test.describe("data-turn-entering: the page shown anew", () => {
   test("not a page loaded already scrolled, from the first frame it is drawn scrolled", async ({
     page,
     context,
+    browserName,
   }) => {
+    test.skip(
+      browserName === "webkit",
+      "Playwright's WebKit does not put the scroll back on a reload: checked by hand in Safari",
+    );
     // Every frame, as it is about to be drawn: never scrolled and still marked. Looked at
     // after the frame's layout, by an observer made after the head script's, which the
     // browser calls after it, just before painting.

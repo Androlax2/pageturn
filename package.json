@@ -24,7 +24,7 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "check": "biome check --error-on-warnings . && tsc --noEmit",
+    "check": "biome check --error-on-warnings . && pnpm run build && tsc --noEmit",
     "format": "biome check --write .",
     "test": "pnpm run build && node tests/astro/fixture/build.mjs && playwright test",
     "size": "pnpm run build && node scripts/size.mjs",

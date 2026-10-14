@@ -741,7 +741,7 @@ navigate normally. The native transition is off too.
 
 ```sh
 make install
-make check     # Biome and TypeScript
+make check     # Biome, the build, and TypeScript
 make test      # Playwright in Chromium, Firefox and WebKit; make test PROJECT=firefox
 make size      # fails above the gzipped size targets
 pnpm run examples   # the examples, on http://localhost:4173/examples/

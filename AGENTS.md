@@ -10,7 +10,7 @@ for what it does in every situation.
 ```sh
 pnpm install
 pnpm run build          # dist/, with esbuild (scripts/build.mjs) and tsc for the types
-pnpm run check          # Biome (warnings fail) and tsc --noEmit
+pnpm run check          # Biome (warnings fail), the build, and tsc --noEmit
 pnpm run test           # build, the Astro fixture, then Playwright in every browser
 pnpm exec playwright test tests/kernel/moves.spec.ts --project chromium   # one spec
 pnpm run size           # gzipped sizes against their targets (scripts/size.mjs)
