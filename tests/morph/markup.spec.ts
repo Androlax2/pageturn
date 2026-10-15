@@ -172,28 +172,24 @@ test("the list's own cards are not taken for where the picture lands", async ({
   context,
 }) => {
   // The list shows the name too, on every card: seen() must not read it as the product
-  // page's. The first time, the layer waits for the page reached, where the card left it.
-  const firstFrame = `<script>
-    requestAnimationFrame(() => {
-      const layer = document.querySelector("html > [data-turn-layer]");
-      const box = layer && layer.getBoundingClientRect();
-      note("layer at first frame", box && [box.left, box.top, box.width, box.height].map(Math.round));
-    });
+  // page's. The first time, the layer is handed over where the clicked card is.
+  const handedOver = `<script>
     addEventListener("pagehide", () => {
       const layer = document.querySelector("html > [data-turn-layer]");
       const box = layer && layer.getBoundingClientRect();
       note("layer handed over at", box && [box.left, box.top, box.width, box.height].map(Math.round));
     });
   </script>`;
-  const site = pages(firstFrame);
+  const site = pages(handedOver);
   await serve(context, { ...site, other: site.product });
   await page.goto("/t/list");
   await page.waitForLoadState("load");
   await page.click("#card2");
   await page.waitForURL("**/t/product");
-  expect(await noted(page, "/t/product", "layer at first frame")).toEqual([
-    160, 40, 120, 60,
-  ]);
+  // Handed over where the clicked card is: it held still, with no estimate to go to.
+  await expect
+    .poll(() => noted(page, "/t/list", "layer handed over at"))
+    .toEqual([160, 40, 120, 60]);
   await landed(page);
 
   // Seen once on a product page: another product, of the same template, is travelled to
