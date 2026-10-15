@@ -2,6 +2,12 @@
  * What the head script, the kernel and the morph each ask of the page, said once.
  */
 
+/**
+ * In a browser, not a server rendering the page: there pageturn's modules may be imported
+ * (a framework's layout), and do nothing.
+ */
+export const inBrowser = typeof document !== "undefined";
+
 /** The navigation that loaded this page, as the browser timed it. */
 export const navigationEntry = (): PerformanceNavigationTiming | undefined =>
   performance.getEntriesByType("navigation")[0] as

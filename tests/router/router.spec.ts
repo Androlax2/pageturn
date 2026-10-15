@@ -301,3 +301,21 @@ test("under reduced motion, the router navigates and nothing is marked", async (
     });
   expect(await noted(page, "/t/a", "leaving")).toBe(undefined);
 });
+
+test("a navigation to a place in the same page plays no move", async ({
+  page,
+  context,
+}) => {
+  await serve(context, { a: routed({ css: LEAVE_CSS }) });
+  await open(page, "/t/a");
+  await page.evaluate(() =>
+    (window as { go?: (to: string) => void }).go?.("/t/a#below"),
+  );
+  await expect
+    .poll(() => noted(page, "/t/a", "after swap"))
+    .toMatchObject({
+      leaving: null,
+      arriving: null,
+    });
+  expect(await noted(page, "/t/a", "leaving")).toBe(undefined);
+});

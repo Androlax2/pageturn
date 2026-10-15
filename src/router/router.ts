@@ -8,7 +8,8 @@
  * Needs the head script, which marks the first page and carries an arrival's data for
  * CSS. Inert without it, in a frame, and under reduced motion.
  */
-import { reducesMotion } from "../common/page.ts";
+import { warn } from "../common/dev.ts";
+import { inBrowser, reducesMotion } from "../common/page.ts";
 import { registry } from "../common/registry.ts";
 import { readSession, writeSession } from "../common/session.ts";
 import type {
@@ -34,7 +35,8 @@ export interface NavigationStart {
   to: URL | string;
   /**
    * "link": a link was clicked. "script": the router was asked from code. "history":
-   * Back or Forward, which plays no leave.
+   * Back or Forward, which plays no leave. A router that cannot tell a click from code
+   * says "link": with no link clicked to `to`, it is taken as code.
    */
   via: "link" | "script" | "history";
   /** The link clicked, when the router knows it. Otherwise the last one clicked to `to`. */
@@ -57,7 +59,8 @@ export interface RouterNavigation {
   /**
    * Says the new content is in the DOM. Called in the same task as the router's DOM
    * update, before the browser paints: the leaving mark gives way to the arriving one
-   * between two frames.
+   * between two frames. The router has updated the address by then: the page reached is
+   * where `location` says.
    */
   swapped(): void;
   /** Says the router gave this navigation up: the page left is put back as it was. */
@@ -87,8 +90,6 @@ const KEPT_ENTRIES = 50;
 /** How long a click names the link of the navigation that follows it. */
 const CLICK_FRESH_MS = 1000;
 
-const root = document.documentElement;
-
 const INERT: RouterNavigation = {
   left: Promise.resolve(),
   swapped() {},
@@ -98,20 +99,23 @@ const INERT: RouterNavigation = {
 let current: Playing | null = null;
 
 /** The address shown, as the engine last left or reached it: the page Back leaves. */
-let shown = location.href;
+let shown = inBrowser ? location.href : "";
 
 let lastClick: { link: HTMLAnchorElement; at: number } | null = null;
 
-addEventListener(
-  "click",
-  (event) => {
-    const link = event
-      .composedPath()
-      .find((target) => target instanceof HTMLAnchorElement);
-    if (link) lastClick = { link, at: Date.now() };
-  },
-  true,
-);
+if (inBrowser) {
+  registry.routed = true;
+  addEventListener(
+    "click",
+    (event) => {
+      const link = event
+        .composedPath()
+        .find((target) => target instanceof HTMLAnchorElement);
+      if (link) lastClick = { link, at: Date.now() };
+    },
+    true,
+  );
+}
 
 interface NavigationEntry {
   key: string;
@@ -191,8 +195,15 @@ function clickedTo(to: URL): HTMLAnchorElement | null {
  * "superseded".
  */
 export function startNavigation(start: NavigationStart): RouterNavigation {
+  if (!inBrowser) return INERT;
   const to = new URL(start.to, location.href);
-  if (!window.pageturn || window.top !== window || reducesMotion()) {
+  if (
+    !window.pageturn ||
+    window.top !== window ||
+    reducesMotion() ||
+    // The same path and query: a place in the page (#…), not another page.
+    addressOf(to) === addressOf(new URL(shown))
+  ) {
     shown = to.href;
     return INERT;
   }
@@ -215,12 +226,13 @@ export function startNavigation(start: NavigationStart): RouterNavigation {
   };
   if (start.via === "history") return drive;
 
+  // A router that cannot tell a click from code says "link": with no link clicked to
+  // that address, it is code.
+  const clicked = start.via === "link" ? (start.link ?? clickedTo(to)) : null;
   const visit: Visit = {
     link:
-      start.link ??
-      clickedTo(to) ??
-      Object.assign(document.createElement("a"), { href: to.href }),
-    via: start.via,
+      clicked ?? Object.assign(document.createElement("a"), { href: to.href }),
+    via: clicked ? "link" : "script",
     from,
     to,
     canHandOver: true,
@@ -228,7 +240,7 @@ export function startNavigation(start: NavigationStart): RouterNavigation {
   const name =
     start.move !== undefined
       ? start.move
-      : start.via === "link"
+      : clicked
         ? choose(visit)
         : registry.settings.defaultMove;
   if (name === null) return drive;
@@ -252,15 +264,30 @@ export function startNavigation(start: NavigationStart): RouterNavigation {
 function swapped(playing: Playing): void {
   if (current !== playing) return;
   current = null;
-  shown = playing.to.href;
+  // Where the router shows it: its address can differ from the one asked for (a base
+  // path, a trailing slash, a redirect). The router has updated it by now.
+  const reached = new URL(location.href);
+  shown = reached.href;
   const published = window.pageturn;
   if (!published) return;
+  if (DEV) {
+    try {
+      if (document.documentElement.matches(":active-view-transition")) {
+        warn(
+          "transition",
+          "the router plays its own view transition while pageturn plays a move: turn the router's view transitions off where pageturn plays.",
+        );
+      }
+    } catch {
+      // A browser that cannot tell has no view transitions to play.
+    }
+  }
   published.endArrival();
-  delete root.dataset.turnLeaving;
+  delete document.documentElement.dataset.turnLeaving;
   let arrival: Arrival | null = null;
   if (playing.via === "history") {
     arrival = returnArrival(
-      readEntries()[keyOf(playing.to)] ?? null,
+      readEntries()[keyOf(reached)] ?? null,
       playing.report,
     );
   } else {
@@ -280,14 +307,14 @@ function swapped(playing: Playing): void {
       turn && handover?.returnAs
         ? {
             move: turn.move,
-            to: playing.to.pathname,
+            to: reached.pathname,
             returnAs: handover.returnAs,
             remember: (handover.remember ?? null) as Json,
           }
         : null,
     );
     // Reached by a link or from code: shown anew, as a page a link reaches.
-    root.dataset.turnEntering = "";
+    document.documentElement.dataset.turnEntering = "";
   }
   published.arrival = arrival;
   if (arrival) published.markArrival?.(arrival);
@@ -298,7 +325,7 @@ function swapped(playing: Playing): void {
 /** The navigation ends with the page left still shown: its move undoes what it changed. */
 function end(playing: Playing, reason: Stay["reason"]): void {
   current = null;
-  delete root.dataset.turnLeaving;
+  delete document.documentElement.dataset.turnLeaving;
   const { turn } = playing;
   if (!turn) return;
   const stay: Stay = { reason, handover: playing.handover ?? null };

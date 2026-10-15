@@ -1,9 +1,11 @@
 /**
  * Builds dist/:
  * - index.js, core.js, prefetch.js, native.js, morph.js, morph-markup.js, testing.js,
- *   router.js: the ESM entries, for bundlers, sharing their code through chunks so no
- *   page carries the kernel twice;
- * - astro.js: the integration;
+ *   router.js and the adapters' browser halves (sveltekit.js, turbo.js, vue.js,
+ *   nuxt-plugin.js, react-router.js, next.js): the ESM entries, for bundlers, sharing
+ *   their code through chunks so no page carries the kernel twice;
+ * - astro.js, the integration, sveltekit-server.js and nuxt.js, the Nuxt module: for
+ *   Node;
  * - pageturn.js: head script and full kernel as one classic script, minified;
  *   pageturn-morph.js, the morph and its head half, the same way;
  * - head.js, head-core.js and head-string.js: the head script with and without its native
@@ -30,7 +32,7 @@ await mkdir(dist(""), { recursive: true });
  * keeps them agreed.
  */
 const INTERNAL =
-  /^(storeVersion|writeMark|forgetMark|readReport|writeReport|canStore|readEntry|writeEntry|returnArrival|store|reveal|native|moves|choosers|report|installed|declined|prefetcher|handsOver|swapNext|markArrival|notAnew)$/;
+  /^(storeVersion|writeMark|forgetMark|readReport|writeReport|canStore|readEntry|writeEntry|returnArrival|store|reveal|native|moves|choosers|report|installed|declined|prefetcher|handsOver|swapNext|markArrival|notAnew|routed)$/;
 const { mangleCache } = await esbuild.build({
   bundle: true,
   entryPoints: [
@@ -40,10 +42,17 @@ const { mangleCache } = await esbuild.build({
     "morph/markup.ts",
     "morph/head.ts",
     "router/router.ts",
+    "sveltekit/sveltekit.ts",
+    "turbo/turbo.ts",
+    "vue/vue.ts",
+    "nuxt/plugin.ts",
+    "react-router/react-router.ts",
+    "next/next.ts",
   ].map(src),
   outdir: "unused",
   write: false,
-  define: { NATIVE: "true" },
+  external: ["react", "react-router", "next", "next/*"],
+  define: { NATIVE: "true", DEV: "true" },
   mangleProps: INTERNAL,
   // esbuild only answers with a cache when it is given one.
   mangleCache: {},
@@ -54,28 +63,45 @@ const shared = {
   bundle: true,
   target: TARGET,
   legalComments: "none",
+  // The warnings for development: only in dist/dev/ (see below).
+  define: { DEV: "false" },
   mangleProps: INTERNAL,
   mangleCache,
 };
 
-await esbuild.build({
-  ...shared,
-  // Each entry of package.json's exports, by the name of its file in dist/.
-  entryPoints: {
-    index: src("index.ts"),
-    core: src("kernel/core.ts"),
-    prefetch: src("prefetch/prefetch.ts"),
-    native: src("default-move/native.ts"),
-    morph: src("morph/index.ts"),
-    "morph-markup": src("morph/markup.ts"),
-    testing: src("testing/testing.ts"),
-    router: src("router/router.ts"),
-  },
-  format: "esm",
-  splitting: true,
-  chunkNames: "chunks/[name]-[hash]",
-  outdir: dist("").pathname,
-});
+// Twice: for production (dist/), and for development (dist/dev/), with the warnings that
+// say why a move did not play. package.json's `development` condition serves the second.
+for (const isDev of [false, true]) {
+  await esbuild.build({
+    ...shared,
+    define: { DEV: String(isDev) },
+    // Drops the warnings' dead branches from dist/, with names and layout kept readable.
+    minifySyntax: true,
+    // Each entry of package.json's exports, by the name of its file in dist/.
+    entryPoints: {
+      index: src("index.ts"),
+      core: src("kernel/core.ts"),
+      prefetch: src("prefetch/prefetch.ts"),
+      native: src("default-move/native.ts"),
+      morph: src("morph/index.ts"),
+      "morph-markup": src("morph/markup.ts"),
+      testing: src("testing/testing.ts"),
+      router: src("router/router.ts"),
+      sveltekit: src("sveltekit/sveltekit.ts"),
+      turbo: src("turbo/turbo.ts"),
+      vue: src("vue/vue.ts"),
+      "nuxt-plugin": src("nuxt/plugin.ts"),
+      "react-router": src("react-router/react-router.ts"),
+      next: src("next/next.ts"),
+    },
+    // The framework an adapter is for comes from the site, which has it.
+    external: ["react", "react-router", "next", "next/*"],
+    format: "esm",
+    splitting: true,
+    chunkNames: "chunks/[name]-[hash]",
+    outdir: dist(isDev ? "dev/" : "").pathname,
+  });
+}
 
 // The head script's code never relies on strict mode; the prologue is bytes in every page.
 const unprologued = (text) => text.replace(/^"use strict";/, "").trim();
@@ -89,7 +115,7 @@ async function classic(entry, native, plugins = []) {
     format: "iife",
     minify: true,
     write: false,
-    define: { NATIVE: String(native) },
+    define: { NATIVE: String(native), DEV: "false" },
     plugins,
   });
   return unprologued(outputFiles[0].text);
@@ -135,7 +161,11 @@ await writeFile(
 await copyFile(src("head/head-string.d.ts"), dist("head-string.d.ts"));
 
 await esbuild.build({
-  entryPoints: { astro: src("astro/integration.ts") },
+  entryPoints: {
+    astro: src("astro/integration.ts"),
+    "sveltekit-server": src("sveltekit/server.ts"),
+    nuxt: src("nuxt/module.ts"),
+  },
   bundle: true,
   platform: "node",
   format: "esm",

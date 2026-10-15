@@ -4,12 +4,14 @@
  * whoever removes them, and with `arrivalEnds: "animations"` removes them itself once
  * the page's animations have ended. And `arrive`, told to the move the page arrives under.
  */
+import { warn } from "../common/dev.ts";
 import { afterDomContentLoaded } from "../common/page.ts";
 import { registry } from "../common/registry.ts";
 import type { Arrival, Arrived } from "../common/types.ts";
 import { capOf, isEnding, untilEnded } from "./cap.ts";
 
-const root = document.documentElement;
+/** The page's root, read when needed: the module may be imported where there is none. */
+const root = (): HTMLElement => document.documentElement;
 
 /** Watches the arrival under way, until its marks are gone. */
 let watching: MutationObserver | null = null;
@@ -25,7 +27,7 @@ let endedBy: "settled" | "leave" | null = null;
 const ARRIVE_MAX_MS = 10000;
 
 const isArriving = (): boolean =>
-  "turnArriving" in root.dataset || "turnEntering" in root.dataset;
+  "turnArriving" in root().dataset || "turnEntering" in root().dataset;
 
 const nextFrame = (): Promise<unknown> =>
   new Promise((resolve) => requestAnimationFrame(resolve));
@@ -41,17 +43,17 @@ export function endArrivalBy(by: "settled" | "leave"): void {
 export function followArrival(): void {
   stopFollowing();
   if (!isArriving()) return;
-  let move = root.dataset.turnArriving ?? null;
-  let entering = "turnEntering" in root.dataset;
+  let move = root().dataset.turnArriving ?? null;
+  let entering = "turnEntering" in root().dataset;
   let isCut = false;
   endedBy = null;
   const watch = new MutationObserver(() => {
     // The mark may come after the following started: pagereveal sets it when the browser
     // turns out not to play the default move.
-    move = root.dataset.turnArriving ?? move;
+    move = root().dataset.turnArriving ?? move;
     if (
       entering &&
-      !("turnEntering" in root.dataset) &&
+      !("turnEntering" in root().dataset) &&
       window.pageturn?.notAnew
     ) {
       // Taken off by the package (a page loaded scrolled, a page put back): it was not
@@ -77,7 +79,7 @@ export function followArrival(): void {
     );
   });
   watching = watch;
-  watch.observe(root, {
+  watch.observe(root(), {
     attributeFilter: ["data-turn-arriving", "data-turn-entering"],
   });
   // Two frames after the page is parsed: every module has run, what it started has started.
@@ -96,7 +98,7 @@ export function followArrival(): void {
  */
 async function waitForAnimations(watch: MutationObserver): Promise<void> {
   const until = performance.now() + capOf("--turn-arrive-max", ARRIVE_MAX_MS);
-  for (;;) {
+  for (let isFirst = true; ; isFirst = false) {
     const running = document.getAnimations().filter(
       (animation) =>
         animation.playState === "running" &&
@@ -107,6 +109,13 @@ async function waitForAnimations(watch: MutationObserver): Promise<void> {
         ) &&
         isEnding(animation),
     );
+    const arrival = window.pageturn?.arrival;
+    if (DEV && isFirst && running.length === 0 && arrival?.via === "history") {
+      warn(
+        `return:${arrival.move}`,
+        `this page was returned to under "${arrival.move}" with no animation: Back cannot play a leave, so the page left goes at once and this one shows at once. Animate it in, as html[data-turn-arriving="${arrival.move}"] main { animation: … }.`,
+      );
+    }
     const left = until - performance.now();
     if (running.length === 0 || left <= 0) break;
     await untilEnded(running, left);

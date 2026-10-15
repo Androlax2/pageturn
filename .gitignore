@@ -9,6 +9,18 @@ playwright-report/
 tests/astro/fixture/dist-*/
 tests/astro/fixture/node_modules/
 tests/astro/fixture/.astro/
+tests/sveltekit/fixture/build/
+tests/sveltekit/fixture/.svelte-kit/
+tests/turbo/fixture/build/
+tests/vue/fixture/build/
+tests/nuxt/fixture/.output/
+tests/nuxt/fixture/.nuxt/
+tests/nuxt/fixture/node_modules/
+tests/nuxt/fixture/dist
+tests/react-router/fixture/build/
+tests/next/fixture/out/
+tests/next/fixture/.next/
+tests/next/fixture/next-env.d.ts
 
 # Editors and local tools
 .idea/

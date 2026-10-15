@@ -3,6 +3,7 @@
  * (pageturn/prefetch, pageturn/native). Importing it installs the kernel, once per page.
  */
 
+import { inBrowser } from "../common/page.ts";
 import { registry } from "../common/registry.ts";
 import type {
   Arrival,
@@ -49,7 +50,7 @@ export function defineMove<C extends Carries = Carries>(
 ): () => void {
   const stored = move as Move;
   registry.moves.set(name, stored);
-  const reached = window.pageturn?.arrival;
+  const reached = inBrowser ? window.pageturn?.arrival : null;
   if (reached?.move === name && stored.arrive) {
     queueMicrotask(() => {
       if (registry.moves.get(name) === stored) tellArrival(reached);
@@ -81,7 +82,7 @@ export function chooseMove(
  * that brought it here: by a link, its data; by Back or Forward, its remember and report.
  */
 export function arrival<C extends Carries = Carries>(): Arrival<C> | null {
-  return (window.pageturn?.arrival ?? null) as Arrival<C> | null;
+  return ((inBrowser && window.pageturn?.arrival) || null) as Arrival<C> | null;
 }
 
 /**
@@ -91,7 +92,7 @@ export function arrival<C extends Carries = Carries>(): Arrival<C> | null {
  * kernel does it itself once the animations end: call this to end it sooner.
  */
 export function endArrival(move?: string): void {
-  window.pageturn?.endArrival(move);
+  if (inBrowser) window.pageturn?.endArrival(move);
 }
 
 /**

@@ -10,15 +10,25 @@ import type { BrowserContext, Page, Route } from "@playwright/test";
  * - "classic" (default): pageturn.js, the head script and full kernel in one;
  * - "full": the head script with its native half, and the full ESM entry;
  * - "core": the head script without it, and pageturn/core;
- * - "no-head": pageturn/core alone, with no head script.
+ * - "no-head": pageturn/core alone, with no head script;
+ * - "dev", "dev-no-head": the same as "core" and "no-head", from the development build
+ *   (dist/dev/), which warns.
  */
-export type Kernel = "classic" | "full" | "core" | "no-head";
+export type Kernel =
+  | "classic"
+  | "full"
+  | "core"
+  | "no-head"
+  | "dev"
+  | "dev-no-head";
 
 const KERNELS: Record<Kernel, string> = {
   classic: `<script src="/dist/pageturn.js"></script>`,
   full: `<script src="/dist/head.js"></script><script type="module" src="/dist/index.js"></script>`,
   core: `<script src="/dist/head-core.js"></script><script type="module" src="/dist/core.js"></script>`,
   "no-head": `<script type="module" src="/dist/core.js"></script>`,
+  dev: `<script src="/dist/head-core.js"></script><script type="module" src="/dist/dev/core.js"></script>`,
+  "dev-no-head": `<script type="module" src="/dist/dev/core.js"></script>`,
 };
 
 export interface PageSpec {

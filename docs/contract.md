@@ -142,7 +142,7 @@ A navigation a client router makes inside the page, driven by an adapter
 | --- | --- |
 | The router handles a link | The move is chosen as for any click (`data-turn`, choosers, `match`, the default) and plays its leave. The router swaps the content only once the leave has ended |
 | The router navigates from code | The move the adapter names, or the default move. `match` and the choosers are not asked; `turn.link` is an `<a>` to the destination that is not in the page, and `turn.via` is `"script"` |
-| The new content is in | In the same task: `data-turn-leaving` removed, `data-turn-arriving` set with what the move carried (`--turn-<key>`, `data-turn-with`), `data-turn-entering` set. `arrival()` answers the new arrival, and the move's `arrive` is told |
+| The new content is in | The page reached is where `location` says (a router may add a base path, a trailing slash, follow a redirect). In the same task: `data-turn-leaving` removed, `data-turn-arriving` set with what the move carried (`--turn-<key>`, `data-turn-with`), `data-turn-entering` set. `arrival()` answers the new arrival, and the move's `arrive` is told |
 | Back and Forward | No leave. The page arrives under the `returnAs` of the move that left it, with `remembered` and `reported`, or plainly. Not shown anew |
 | Where a return is kept | Per history entry, by the Navigation API's entry key where there is one, by the address otherwise; in `sessionStorage`, never in `history.state`, which the router owns. The last 50 entries |
 | `whenLeft` | Asked as each navigation starts. On Back the address has already changed: a report reads what it describes from the page, not from `location` |
@@ -151,4 +151,79 @@ A navigation a client router makes inside the page, driven by an adapter
 | A leave that throws or outlasts `leaveTimeout` | The router swaps with no move, as a real navigation goes unmarked |
 | `pageturn:leaving` cancelled, `data-turn="none"`, a chooser answers `null` | The router navigates with no move. The page swapped in is still shown anew |
 | Slow data | The page waits in its leaving state until the router swaps. `stuckTimeout` does not apply |
+| The same path and query (`#place`, a router that navigates within the page) | No move: the router navigates as if pageturn were not there |
 | Reduced motion, a frame, no head script | Inert: the router navigates, nothing is marked |
+| Imported where there is no document (a framework rendering on the server) | Nothing happens. `defineMove` registers, `arrival()` answers `null`, `startNavigation` answers a navigation that does nothing |
+
+### SvelteKit (`pageturn/sveltekit`)
+
+| Situation | What happens |
+| --- | --- |
+| A link, `goto()`, a form SvelteKit handles | A move plays, as above. The leave starts as SvelteKit starts the navigation, while it loads the page's data |
+| Back and Forward | No leave; the page arrives under its `returnAs`, as above |
+| Another `beforeNavigate` cancels it | `cancelled`: the page is put back, as above |
+| A link SvelteKit leaves to the browser (`data-sveltekit-reload`, another app) | A real navigation, handled by the kernel: its move plays as between real pages |
+| The page as SvelteKit renders it on the server | `pageturnHandle()` puts the head script right after `<head>` and its charset |
+
+### Turbo (`pageturn/turbo`)
+
+| Situation | What happens |
+| --- | --- |
+| A link, a form, `Turbo.visit()` Turbo handles | A move plays. The leave starts at `turbo:before-visit`; Turbo's render waits for it |
+| A page Turbo has cached | Its preview is not rendered while a move plays: the page left stays leaving until the real render, and the page arrives once |
+| Back and Forward (restoration visits) | No leave; the page arrives under its `returnAs` |
+| Another listener cancels `turbo:before-visit`, or the fetch fails | `cancelled`: the page is put back |
+| A link Turbo leaves to the browser (`data-turbo="false"`) | A real navigation, handled by the kernel, with its move |
+
+### Vue Router (`pageturn/vue`)
+
+| Situation | What happens |
+| --- | --- |
+| `<RouterLink>`, `router.push()` | A move plays: a link's for a link, the default move for code. The router waits for the leave in `beforeResolve` |
+| Back and Forward | No leave; the page arrives under its `returnAs` |
+| A guard aborts it, a newer navigation cancels it, a guard throws | `cancelled`: the page is put back |
+| A `#place` in the same route | No move |
+| The app's first navigation | No move |
+
+### Nuxt (`pageturn/nuxt`)
+
+The Vue Router rows, on Nuxt's router, and:
+
+| Situation | What happens |
+| --- | --- |
+| The page reached is shown | At `page:finish`, once Nuxt's `<Suspense>` has resolved; 4 s after the router's `afterEach` at the latest |
+| Every page Nuxt renders | The head script first among `app.head`'s scripts (`tagPriority: "critical"`) |
+
+### React Router (`pageturn/react-router`)
+
+| Situation | What happens |
+| --- | --- |
+| `<Link>`, `navigate()` | A move plays: a link's for a link, the default move for code. The route's loaders run during the leave; the router commits once both are done |
+| Back and Forward | No leave; the page arrives under its `returnAs` |
+| A navigation overtaken by the next | Its move's `stay` hears `superseded`; the next plays its own |
+| The router aborts it and nothing follows | `cancelled` |
+| The first load | No move: the middleware passes until the root layout has mounted |
+| `<Link reloadDocument>` | A real navigation, handled by the kernel, with its move |
+
+### Next.js (`pageturn/next`)
+
+| Situation | What happens |
+| --- | --- |
+| pageturn's `Link`, `useTurnRouter().push()` | Next's navigation is stopped, the leave plays while the page is prefetched, then the router navigates; the page arrives as `<Pageturn />` sees it |
+| A `Link` whose own `onNavigate` calls `preventDefault()` | Nothing: no leave, no navigation |
+| A plain `next/link`, a bare `router.push`, Back and Forward | No leave. The page arrives: under its `returnAs` on Back when it has one, plainly otherwise |
+| A navigation overtaken during its leave | Its move's `stay` hears `superseded`, and the router is never asked to go there |
+| A `Link` with a URL object as `href` | Left to Next: no leave, the page arrives plainly |
+
+## In development
+
+From the build `package.json`'s `development` export condition serves (`dist/dev/`); a
+production build carries none of it.
+
+| Situation | What is said, once, in the console |
+| --- | --- |
+| The kernel loads on a page with no head script (not in a frame) | The head script is missing: links navigate with no move |
+| The kernel installs under reduced motion | Nothing plays, and why |
+| A click someone else prevented leads, 300 ms later, to the link's address, and `pageturn/router` is not on the page | A client router took the link, with no adapter |
+| A page returned to by history, under a move, has no animation running two frames after it is parsed | It shows at once: animate it in under that move |
+| `swapped()` while `:active-view-transition` matches | The router plays its own view transition alongside pageturn |

@@ -9,6 +9,7 @@
     "rootDir": "src"
   },
   "include": [
+    "src/common/flags.d.ts",
     "src/index.ts",
     "src/kernel/core.ts",
     "src/prefetch/prefetch.ts",
@@ -17,6 +18,13 @@
     "src/morph/markup.ts",
     "src/testing/testing.ts",
     "src/router/router.ts",
+    "src/sveltekit/sveltekit.ts",
+    "src/sveltekit/server.ts",
+    "src/turbo/turbo.ts",
+    "src/vue/vue.ts",
+    "src/nuxt/module.ts",
+    "src/react-router/react-router.ts",
+    "src/next/next.ts",
     "src/astro/integration.ts"
   ]
 }

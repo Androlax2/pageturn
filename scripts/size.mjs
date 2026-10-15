@@ -41,26 +41,50 @@ const PARTS = [
   // Inline in every page: it carries the storage the kernel reads, the check of a page
   // loaded scrolled after every frame until the page has loaded, and what an arrival
   // carried to give back.
-  ["head.js", 1550, () => readFile(`${DIST}head.js`)],
+  ["head.js", 1560, () => readFile(`${DIST}head.js`)],
   ["head-core.js", 1450, () => readFile(`${DIST}head-core.js`)],
   // The head script and the whole kernel, with prefetch and the native hand-off.
   ["pageturn.js", 4250, () => readFile(`${DIST}pageturn.js`)],
   ["pageturn.css", 600, () => readFile(`${DIST}pageturn.css`)],
   // What a site that turns prefetch and the native hand-off off ships.
-  ["pageturn/core, bundled", 2750, () => bundled("core.js")],
-  ["pageturn, bundled", 3050, () => bundled("index.js")],
+  ["pageturn/core, bundled", 2800, () => bundled("core.js")],
+  ["pageturn, bundled", 3100, () => bundled("index.js")],
   // A client router's engine, beside the kernel the page has already.
   [
     "pageturn/router, beside the kernel",
-    1400,
+    1450,
     () => bundled("router.js", true),
+  ],
+  // The SvelteKit adapter: the router engine and its hooks, beside the kernel.
+  [
+    "pageturn/sveltekit, beside the kernel",
+    1600,
+    () => bundled("sveltekit.js", true),
+  ],
+  // The Turbo adapter: the router engine on Turbo's events, beside the kernel.
+  ["pageturn/turbo, beside the kernel", 1750, () => bundled("turbo.js", true)],
+  // The Vue Router adapter: the router engine on its guards, beside the kernel.
+  ["pageturn/vue, beside the kernel", 1700, () => bundled("vue.js", true)],
+  // The plugin pageturn/nuxt adds: the Vue Router adapter, swapped at page:finish.
+  // The Next.js adapter: its Link, router and watcher, beside the kernel.
+  ["pageturn/next, beside the kernel", 1950, () => bundled("next.js", true)],
+  // The React Router adapter: its middleware and hook, beside the kernel.
+  [
+    "pageturn/react-router, beside the kernel",
+    1700,
+    () => bundled("react-router.js", true),
+  ],
+  [
+    "pageturn/nuxt's plugin, beside the kernel",
+    1800,
+    () => bundled("nuxt-plugin.js", true),
   ],
   // pageturn/morph as a site ships it, with only what it imports and without the kernel,
   // which the page has already. The core, then what each part adds to it.
-  ["pageturn/morph, the core", 5300, () => using("defineMorph")],
+  ["pageturn/morph, the core", 5350, () => using("defineMorph")],
   [
     "pageturn/morph, the core with here()",
-    5350,
+    5380,
     () => using("defineMorph, here"),
   ],
   ...[
@@ -110,8 +134,10 @@ async function bundled(entry, withoutKernel = false) {
     minify: true,
     format: "esm",
     write: false,
-    // Measures an entry without the kernel it shares with the page.
+    // Measures an entry without the kernel it shares with the page, and without the
+    // framework an adapter is for, which the site has.
     plugins: withoutKernel ? [kernelElsewhere] : [],
+    external: ["react", "react-router", "next", "next/*"],
   });
   return outputFiles[0].contents;
 }

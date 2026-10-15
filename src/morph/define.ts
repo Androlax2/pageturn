@@ -6,7 +6,7 @@
  * for any of them.
  */
 
-import { reducesMotion } from "../common/page.ts";
+import { inBrowser, reducesMotion } from "../common/page.ts";
 import { isDeclined, registry } from "../common/registry.ts";
 import { writeSession } from "../common/session.ts";
 import { defineMove, type Handover, type Json } from "../kernel/core.ts";
@@ -69,7 +69,7 @@ export function defineMorph<D = Json>(
 ): () => void {
   // In a frame (a copy peek() or behind() loads) or under reduced motion, nothing plays:
   // nothing is set up, nothing is loaded ahead.
-  if (window.top !== window || reducesMotion()) {
+  if (!inBrowser || window.top !== window || reducesMotion()) {
     return () => {};
   }
   defined.add(name);

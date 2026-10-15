@@ -9,7 +9,7 @@
  * element with the name. Found where it was last seen (`seen()`), and played back on
  * Back (`back()`). A name the site defines itself with defineMorph is left to it.
  */
-import { afterDomContentLoaded } from "../common/page.ts";
+import { afterDomContentLoaded, inBrowser } from "../common/page.ts";
 import { back } from "./back.ts";
 import { defineMorph, isDefined } from "./define.ts";
 import { seen } from "./finders.ts";
@@ -37,4 +37,4 @@ function morphsFromMarkup(): void {
 
 // Once every module of the page has run, so that a defineMorph of the same name, in
 // the site's own module, is there first.
-afterDomContentLoaded(morphsFromMarkup);
+if (inBrowser) afterDomContentLoaded(morphsFromMarkup);

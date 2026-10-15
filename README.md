@@ -89,6 +89,153 @@ first in every page's `<head>`, so your own inline scripts can read
 The integration ships only what these options use. Your own scripts import from
 `pageturn/core` (see [Entries](#entries)).
 
+### SvelteKit
+
+```js
+// src/hooks.server.js: the head script first in every page
+import { pageturnHandle } from "pageturn/sveltekit/server";
+export const handle = pageturnHandle();
+```
+
+```svelte
+<!-- src/routes/+layout.svelte -->
+<script>
+  import "pageturn/pageturn.css";
+  import { beforeNavigate, onNavigate } from "$app/navigation";
+  import { pageturn } from "pageturn/sveltekit";
+
+  pageturn({ beforeNavigate, onNavigate });
+</script>
+```
+
+SvelteKit's own navigations then play the same moves: links, `goto()`, Back and Forward.
+The leave plays while SvelteKit loads the next page's data, and SvelteKit waits for it
+before it updates the page. A link SvelteKit leaves to the browser
+(`data-sveltekit-reload`) is a real navigation, and plays its move too. With
+`pageturn/no-native.css` or your own CSS, `pageturnHandle({ native: false })`. Under a
+Content-Security-Policy, add `headScriptHash` from `pageturn/head` to `kit.csp`. Turn off
+any SvelteKit view-transition recipe: two systems animating one swap is the likeliest
+bug.
+
+### Rails, with Turbo
+
+```html
+<!-- In the layout's <head>: the head script, then the stylesheet -->
+<script src="/pageturn/head.js"></script>
+<link rel="stylesheet" href="/pageturn/pageturn.css">
+```
+
+```js
+// app/javascript/application.js
+import "@hotwired/turbo-rails";
+import "pageturn/turbo";
+```
+
+Turbo Drive's visits then play the same moves: links, forms, `Turbo.visit()`, Back and
+Forward. The leave plays while Turbo fetches the page, and Turbo holds its render until
+it has ended. On a page Turbo has cached, its preview is not shown under the leave: the
+page arrives once, from its real render. A link Turbo leaves to the browser
+(`data-turbo="false"`) is a real navigation, with its move. Copy `head.js` and the
+stylesheet from `node_modules/pageturn/dist/` (or inline `headScript` from
+`pageturn/head`), and remove Turbo's `view-transition` meta tag where pageturn plays.
+
+### Vue Router
+
+```js
+// main.js, before the app mounts
+import "pageturn/pageturn.css";
+import { pageturn } from "pageturn/vue";
+pageturn(router);
+```
+
+```html
+<!-- index.html, first in <head> -->
+<script src="/pageturn/head.js"></script>
+```
+
+The router's navigations then play the same moves: `<RouterLink>`, `router.push()`,
+Back and Forward. The leave starts with the navigation, and the router waits for it once
+the route's components have loaded. A navigation a guard aborts puts the page back. A
+`#place` in the same route plays no move. With Nuxt, use [`pageturn/nuxt`](#nuxt) rather
+than calling this yourself.
+
+### Nuxt
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ["pageturn/nuxt"], // or [["pageturn/nuxt", { css: "no-native" }]]
+});
+```
+
+The module puts the head script first in every page, adds the stylesheet (`css`:
+`true`, `"no-native"` or `false`), and plays the same moves on Nuxt's navigations:
+`<NuxtLink>`, `navigateTo()`, Back and Forward. The page reached arrives once Nuxt's
+`<Suspense>` has resolved (`page:finish`). Turn off `experimental.viewTransition` and any
+`pageTransition` where pageturn plays.
+
+### React Router
+
+```jsx
+import { pageturnMiddleware, usePageturn } from "pageturn/react-router";
+
+const router = createBrowserRouter([
+  { path: "/", Component: Root, middleware: [pageturnMiddleware], children },
+]);
+
+function Root() {
+  usePageturn();
+  return <Outlet />;
+}
+```
+
+With the stylesheet imported once and the head script first in the document's `<head>`.
+React Router 7.9 or later, with data routers (`createBrowserRouter`) or framework mode.
+The middleware starts the leave as the navigation does, runs the route's loaders
+meanwhile, and lets the router commit when both are done; the hook says when the route
+reached is in the DOM. `<Link>`, `navigate()`, Back and Forward play the same moves. A
+`<Link reloadDocument>` is a real navigation, with its move. Leave out React Router's
+`viewTransition` where pageturn plays.
+
+### Next.js (App Router)
+
+```jsx
+// app/layout.jsx
+import { coreHeadScript } from "pageturn/head";
+import { Pageturn } from "pageturn/next";
+import "pageturn/no-native.css";
+
+export default function Layout({ children }) {
+  return (
+    <html>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: coreHeadScript }} />
+      </head>
+      <body>
+        <Pageturn />
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+
+```jsx
+import { Link, useTurnRouter } from "pageturn/next";
+
+<Link href="/work">Work</Link>;              // as next/link
+const router = useTurnRouter();               // as useRouter()
+router.push("/work");
+```
+
+Next's router cannot wait for a leave, so pageturn's `Link` stops its navigation, plays
+the leave while the page is prefetched, then asks the router again; `useTurnRouter()`
+does the same from code. `<Pageturn />` says when each page is in the DOM. Back and
+Forward, a plain `next/link` and a bare `router.push` still work: the page arrives (under
+its `returnAs` on Back), with no leave. Put the head script in a plain inline `<script>`:
+`next/script`'s `beforeInteractive` runs it too late, from Next's own code. Next.js 16 or
+later; leave out its experimental view transitions where pageturn plays.
+
 ### Plain HTML, any server
 
 ```html
@@ -682,6 +829,13 @@ scroll layer to stop):
 | `pageturn/morph` | One element from a page to the next. See [docs/morph.md](docs/morph.md) |
 | `pageturn/morph/markup` | The morph from `data-turn-morph`. Imported for its effect |
 | `pageturn/router` | The engine for client routers' navigations, which adapters drive. See [docs/router.md](docs/router.md) |
+| `pageturn/sveltekit` | The SvelteKit adapter: `pageturn({ beforeNavigate, onNavigate })`, with the kernel |
+| `pageturn/sveltekit/server` | `pageturnHandle()`: the head script in every page SvelteKit renders |
+| `pageturn/turbo` | The Turbo Drive adapter, with the kernel. Imported for its effect |
+| `pageturn/vue` | The Vue Router adapter: `pageturn(router)`, with the kernel |
+| `pageturn/nuxt` | The Nuxt module: the head script, the stylesheet, and the Vue Router adapter on Nuxt's router |
+| `pageturn/react-router` | The React Router adapter: `pageturnMiddleware` and `usePageturn()`, with the kernel |
+| `pageturn/next` | The Next.js App Router adapter: `Link`, `useTurnRouter()` and `<Pageturn />`, with the kernel |
 | `pageturn/testing` | For browser tests of a morph: the layer's parts by name, a travel held at a time or at its end |
 | `pageturn/astro` | The Astro integration |
 
@@ -690,6 +844,21 @@ And the files of `dist/` for a page with no bundler: `pageturn.css` or `no-nativ
 
 A site that turns prefetch off and writes its own moves imports `pageturn/core` only. The
 kernel needs the head script: without it, it does nothing, and links navigate normally.
+
+### Warnings in development
+
+While you develop, pageturn says in the console why a move did not play, once each:
+
+- the head script is missing from the page;
+- `prefers-reduced-motion` is on, so nothing plays;
+- a client router took a link and no adapter tells pageturn about it;
+- a page returned to by Back under its `returnAs` has no animation of its own, so it
+  shows at once (Back cannot play a leave, which reads as a flash);
+- a router plays its own view transition while pageturn plays a move.
+
+They come from the build package.json's `development` condition serves, which Vite,
+webpack and the frameworks on them pick while developing. A production build, and the
+files of `dist/` loaded as they are, carry none of it.
 
 ### Content-Security-Policy
 
@@ -724,10 +893,11 @@ checked by hand before each release ([docs/release-checklist.md](docs/release-ch
 
 ## Questions
 
-**Does it work with Next.js, Nuxt, SvelteKit?** Not yet on the links their router
-handles: those do not load a page. `pageturn/router` is the engine for them, with the
-same moves and CSS; the adapters that connect each router are not written yet
-([docs/router.md](docs/router.md)).
+**Does it work with Next.js, Nuxt, SvelteKit?** Yes, with an adapter for each:
+[SvelteKit](#sveltekit), [Turbo](#rails-with-turbo), [Vue Router](#vue-router),
+[Nuxt](#nuxt), [React Router](#react-router) and [Next.js](#nextjs-app-router), all on
+`pageturn/router` ([docs/router.md](docs/router.md)). pageturn can be imported where a
+framework renders on the server: it does nothing there.
 
 **What if JavaScript fails, or the next page is slow?** The click is a real navigation.
 A leave that throws or takes too long navigates anyway. A page that does not come in

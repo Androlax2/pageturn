@@ -8,12 +8,13 @@
  * has its native half, which plays the other side of the hand-off.
  */
 
+import { inBrowser } from "../common/page.ts";
 import { registry } from "../common/registry.ts";
 import type { Store } from "../head/storage.ts";
 
 let nextSwap: string | null | undefined;
 
-if (!registry.native) {
+if (!registry.native && inBrowser) {
   // The page left says, as it goes, whether the browser's transition plays: skipped
   // under a move of the package's, named by its type for the default move's native CSS.
   addEventListener("pageswap", (event) => {

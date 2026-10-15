@@ -32,6 +32,8 @@ export interface Registry {
   report: ((leaving: Leaving) => Json | Declined | undefined) | null;
   settings: Required<Settings>;
   installed: boolean;
+  /** pageturn/router is on the page: an adapter plays the client router's navigations. */
+  routed?: boolean;
   /** What every decline() returns, the same for every copy of the kernel. */
   declined: Declined;
   prefetcher?: (to: URL) => void;

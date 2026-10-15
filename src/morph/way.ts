@@ -2,7 +2,7 @@
  * What the ways back share: where a way out started, kept for the tab (`wayOut`,
  * `forgetWayOut`), and how a layer handed back lands on the element it left from.
  */
-import { navigationEntry } from "../common/page.ts";
+import { inBrowser, navigationEntry } from "../common/page.ts";
 import { readSession, removeSession, writeSession } from "../common/session.ts";
 import { arrival, type Json, type Visit } from "../kernel/core.ts";
 import { handedOver } from "./define.ts";
@@ -73,7 +73,7 @@ function originOf(name: string): Origin | null {
  */
 export function forgetWayOut(name: string): void {
   // A copy loaded in a frame (peek(), behind()) is only looked at: the visit goes on.
-  if (window.top !== window) return;
+  if (!inBrowser || window.top !== window) return;
   removeSession(originKey(name));
 }
 

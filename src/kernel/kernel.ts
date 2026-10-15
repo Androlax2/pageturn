@@ -5,7 +5,8 @@
  * pageturn/prefetch and pageturn/native.
  */
 
-import { reducesMotion } from "../common/page.ts";
+import { warn } from "../common/dev.ts";
+import { inBrowser, reducesMotion } from "../common/page.ts";
 import { registry } from "../common/registry.ts";
 import type {
   Declined,
@@ -15,7 +16,12 @@ import type {
   Turn,
   Visit,
 } from "../common/types.ts";
-import { type Entry, STORE_VERSION, type Store } from "../head/storage.ts";
+import {
+  addressOf,
+  type Entry,
+  STORE_VERSION,
+  type Store,
+} from "../head/storage.ts";
 import { followArrival, stopFollowing, tellArrival } from "./arrival.ts";
 import { choose, leave, turnOf } from "./turn.ts";
 
@@ -28,7 +34,6 @@ interface Playing {
   entry?: Entry | null;
 }
 
-const root = document.documentElement;
 let store: Store;
 let current: Playing | null = null;
 let stuckTimer: ReturnType<typeof setTimeout> | undefined;
@@ -38,10 +43,26 @@ let stuckTimer: ReturnType<typeof setTimeout> | undefined;
  * left with a move either, or the page reached would play half a move.
  */
 export function install(): void {
+  if (!inBrowser) return;
   const published = window.pageturn?.store as Store | undefined;
-  if (registry.installed || published?.storeVersion !== STORE_VERSION) return;
+  if (registry.installed || published?.storeVersion !== STORE_VERSION) {
+    // In a frame the head script is there, and leaves pageturn inert on purpose.
+    if (DEV && !registry.installed && !window.pageturn) {
+      warn(
+        "head",
+        "the head script is not on this page, so links navigate with no move. Put it first in <head>, before any other script (see the README).",
+      );
+    }
+    return;
+  }
   store = published;
   registry.installed = true;
+  if (DEV && reducesMotion()) {
+    warn(
+      "motion",
+      "prefers-reduced-motion is on: pageturn plays nothing, and links navigate as they would without it.",
+    );
+  }
   addEventListener("click", putClickLast, true);
   addEventListener("pointerdown", pressed, true);
   // Capture: runs before the head script's pagehide, which ends the arrival.
@@ -53,9 +74,14 @@ export function install(): void {
 // Attached again at the capture of every click, so it runs after every other handler,
 // including those added to window after the kernel (Turbo does the same).
 function putClickLast(): void {
+  // Before any handler: a router changes the address in its own.
+  if (DEV) clickedAt = addressOf(location);
   removeEventListener("click", clicked);
   addEventListener("click", clicked);
 }
+
+/** The address as a click began, for the development warning about routers. */
+let clickedAt = "";
 
 function linkIn(event: Event): HTMLAnchorElement | null {
   for (const target of event.composedPath()) {
@@ -102,7 +128,27 @@ function pressed(event: PointerEvent): void {
   if (to) prefetch(to);
 }
 
+/**
+ * A click someone else took (a client router, most often): if the address then becomes
+ * the link's, a router navigated with no adapter to tell pageturn.
+ */
+function watchRouter(event: MouseEvent): void {
+  const link = linkIn(event);
+  const to = link && new URL(link.href);
+  if (!to || to.origin !== location.origin || addressOf(to) === clickedAt) {
+    return;
+  }
+  setTimeout(() => {
+    if (registry.routed || addressOf(location) !== addressOf(to)) return;
+    warn(
+      "router",
+      `a client router took the link to ${to.pathname}, so pageturn plays nothing on it. Use pageturn's adapter for that router (see the README), or pageturn/router.`,
+    );
+  }, 300);
+}
+
 function clicked(event: MouseEvent): void {
+  if (DEV && event.defaultPrevented) watchRouter(event);
   if (
     event.defaultPrevented ||
     event.button !== 0 ||
@@ -207,7 +253,7 @@ function endWithoutDeparture(playing: Playing, reason: Stay["reason"]): void {
   current = null;
   clearTimeout(stuckTimer);
   registry.native?.swapNext(undefined);
-  delete root.dataset.turnLeaving;
+  delete document.documentElement.dataset.turnLeaving;
   const stay: Stay = { reason, handover: playing.handover ?? null };
   try {
     registry.moves.get(playing.turn.move)?.stay?.(playing.turn, stay);

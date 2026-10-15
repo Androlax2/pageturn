@@ -17,12 +17,20 @@ const SERVED = {
   "/plain/": folder("../kernel/fixture/"),
   "/astro/": folder("../astro/fixture/"),
   "/examples/": folder("../../examples/"),
+  "/sveltekit/": folder("../sveltekit/fixture/"),
+  "/turbo/": folder("../turbo/"),
+  "/vue/": folder("../vue/"),
+  "/nuxt/": folder("../nuxt/"),
+  "/react-router/": folder("../react-router/"),
+  "/next/": folder("../next/"),
 };
 const CONTENT_TYPES = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".svg": "image/svg+xml",
+  ".json": "application/json",
+  ".txt": "text/plain; charset=utf-8",
 };
 
 /** The file a request names, or nothing when it would leave the served folders. */

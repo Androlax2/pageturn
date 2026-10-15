@@ -34,10 +34,16 @@ locally.
 | `src/prefetch/` | Prefetch on press |
 | `src/morph/` | `pageturn/morph`: one element from a page to the next. `define.ts` is the core; each other file is a part a site imports when it needs it |
 | `src/router/` | `pageturn/router`: the same moves on a client router's navigations, driven by an adapter's three calls |
+| `src/sveltekit/` | The SvelteKit adapter (the router engine on SvelteKit's hooks) and its server `handle` |
+| `src/turbo/` | The Turbo Drive adapter (the router engine on Turbo's events) |
+| `src/vue/` | The Vue Router adapter (the router engine on its guards), which pageturn/nuxt builds on |
+| `src/nuxt/` | The Nuxt module (Node) and the client plugin it adds |
+| `src/react-router/` | The React Router adapter: a root middleware and a layout hook |
+| `src/next/` | The Next.js App Router adapter: its `Link`, `useTurnRouter()` and `<Pageturn />` (a client module, `"use client"`) |
 | `src/classic/` | `pageturn.js` and `pageturn-morph.js`, for sites with no bundler |
 | `src/astro/` | The Astro integration |
 | `src/testing/` | `pageturn/testing`, for a site's own browser tests of a morph |
-| `tests/` | Playwright specs, by area. `tests/support/site.ts` serves pages described in the spec itself; `tests/support/server.mjs` serves `dist/`, the fixtures and the examples |
+| `tests/` | Playwright specs, by area. Each framework has a fixture app, built by `pnpm run test` (`tests/astro/fixture`, `tests/sveltekit/fixture`, `tests/turbo/fixture`, `tests/vue/fixture`, `tests/nuxt/fixture`, `tests/react-router/fixture`, `tests/next/fixture`); `tests/support/framework.ts` is what their specs share. `tests/support/site.ts` serves pages described in the spec itself; `tests/support/server.mjs` serves `dist/`, the fixtures and the examples |
 | `examples/` | Plain HTML examples. `examples/scenarios.ts` lists their steps, read by `tests/examples/` and `scripts/record.mjs` |
 | `docs/` | `contract.md` (the behaviour), `morph.md` (the morph's guide), `router.md` (connecting a client router), `release-checklist.md`, `media/` (the README's recordings) |
 
@@ -61,8 +67,19 @@ locally.
   spec in `tests/`, and with a changeset (`pnpm changeset`) when users will notice it.
 - **Reduced motion and frames.** Under `prefers-reduced-motion: reduce` nothing is marked
   and links navigate normally. In an iframe pageturn is inert.
-- **No dependencies at runtime.** `astro` is an optional peer, used only by
-  `pageturn/astro`.
+- **No dependencies at runtime.** A framework an adapter is for is an optional peer
+  (`astro`, `react`, `react-router`, `next`), kept out of pageturn's bundle (`external` in
+  `scripts/build.mjs`). Where the framework's functions are not a package (SvelteKit's
+  `$app/navigation`), the adapter takes them from the site, as
+  `pageturn({ beforeNavigate, onNavigate })` does.
+- **Safe to import on a server.** Frameworks render layouts on the server: no module
+  touches `document`, `window` or `location` as it loads, and the API does nothing
+  there (`inBrowser` in `src/common/page.ts`). `tests/package/server.spec.ts` imports
+  every entry with no document.
+- **Development warnings** go under `if (DEV)` (`src/common/flags.d.ts`) and through
+  `warn()` (`src/common/dev.ts`). The module entries are built twice: `dist/` with DEV
+  false, the branches dropped; `dist/dev/` with it true, served by package.json's
+  `development` condition. `tests/package/development.spec.ts` triggers each one.
 - **Never publish.** Releases go through the Changesets pull request and CI
   (`docs/release-checklist.md`). Do not run `npm publish` or `changeset publish`.
 

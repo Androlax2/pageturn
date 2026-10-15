@@ -37,7 +37,7 @@
     "build": "node scripts/build.mjs",
     "check": "biome check --error-on-warnings . && pnpm run build && tsc --noEmit",
     "format": "biome check --write .",
-    "test": "pnpm run build && node tests/astro/fixture/build.mjs && playwright test",
+    "test": "pnpm run build && node tests/astro/fixture/build.mjs && node tests/sveltekit/fixture/build.mjs && node tests/turbo/fixture/build.mjs && node tests/vue/fixture/build.mjs && node tests/nuxt/fixture/build.mjs && node tests/react-router/fixture/build.mjs && node tests/next/fixture/build.mjs && playwright test",
     "size": "pnpm run build && node scripts/size.mjs",
     "examples": "pnpm run build && node tests/support/server.mjs",
     "record": "pnpm run build && node scripts/record.mjs",
@@ -55,18 +55,22 @@
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
+      "development": "./dist/dev/index.js",
       "default": "./dist/index.js"
     },
     "./core": {
       "types": "./dist/types/kernel/core.d.ts",
+      "development": "./dist/dev/core.js",
       "default": "./dist/core.js"
     },
     "./prefetch": {
       "types": "./dist/types/prefetch/prefetch.d.ts",
+      "development": "./dist/dev/prefetch.js",
       "default": "./dist/prefetch.js"
     },
     "./native": {
       "types": "./dist/types/default-move/native.d.ts",
+      "development": "./dist/dev/native.js",
       "default": "./dist/native.js"
     },
     "./astro": {
@@ -80,19 +84,56 @@
     },
     "./morph": {
       "types": "./dist/types/morph/index.d.ts",
+      "development": "./dist/dev/morph.js",
       "default": "./dist/morph.js"
     },
     "./morph/markup": {
       "types": "./dist/types/morph/markup.d.ts",
+      "development": "./dist/dev/morph-markup.js",
       "default": "./dist/morph-markup.js"
     },
     "./testing": {
       "types": "./dist/types/testing/testing.d.ts",
+      "development": "./dist/dev/testing.js",
       "default": "./dist/testing.js"
     },
     "./router": {
       "types": "./dist/types/router/router.d.ts",
+      "development": "./dist/dev/router.js",
       "default": "./dist/router.js"
+    },
+    "./sveltekit": {
+      "types": "./dist/types/sveltekit/sveltekit.d.ts",
+      "development": "./dist/dev/sveltekit.js",
+      "default": "./dist/sveltekit.js"
+    },
+    "./sveltekit/server": {
+      "types": "./dist/types/sveltekit/server.d.ts",
+      "default": "./dist/sveltekit-server.js"
+    },
+    "./turbo": {
+      "types": "./dist/types/turbo/turbo.d.ts",
+      "development": "./dist/dev/turbo.js",
+      "default": "./dist/turbo.js"
+    },
+    "./vue": {
+      "types": "./dist/types/vue/vue.d.ts",
+      "development": "./dist/dev/vue.js",
+      "default": "./dist/vue.js"
+    },
+    "./nuxt": {
+      "types": "./dist/types/nuxt/module.d.ts",
+      "default": "./dist/nuxt.js"
+    },
+    "./react-router": {
+      "types": "./dist/types/react-router/react-router.d.ts",
+      "development": "./dist/dev/react-router.js",
+      "default": "./dist/react-router.js"
+    },
+    "./next": {
+      "types": "./dist/types/next/next.d.ts",
+      "development": "./dist/dev/next.js",
+      "default": "./dist/next.js"
     },
     "./morph-head.js": "./dist/morph-head.js",
     "./pageturn.css": "./dist/pageturn.css",
@@ -101,10 +142,22 @@
     "./pageturn-morph.js": "./dist/pageturn-morph.js"
   },
   "peerDependencies": {
-    "astro": ">=7"
+    "astro": ">=7",
+    "react": ">=18",
+    "react-router": ">=7.9",
+    "next": ">=16"
   },
   "peerDependenciesMeta": {
     "astro": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-router": {
+      "optional": true
+    },
+    "next": {
       "optional": true
     }
   },
@@ -112,12 +165,26 @@
     "@arethetypeswrong/cli": "^0.18.5",
     "@biomejs/biome": "2.5.15",
     "@changesets/cli": "^3.0.3",
+    "@hotwired/turbo": "^8.0.23",
     "@playwright/test": "1.64.0",
+    "@sveltejs/adapter-static": "^4.0.0",
+    "@sveltejs/kit": "^3.0.1",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
     "astro": "7.3.8",
     "esbuild": "0.28.2",
+    "next": "^16.4.0",
+    "nuxt": "^4.6.1",
     "publint": "^0.3.25",
-    "typescript": "^6.0.3"
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^8.4.0",
+    "svelte": "^5.57.2",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.4",
+    "vue": "^3.5.44",
+    "vue-router": "^5.4.0"
   },
   "publishConfig": {
     "access": "public"
