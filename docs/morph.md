@@ -130,7 +130,10 @@ defineMorph("photo", {
 ```
 
 - `back()` plays it backwards on the browser's Back: the photo shrinks into its
-  thumbnail, wherever the gallery was scrolled.
+  thumbnail, wherever the gallery was scrolled. A page cannot hold Back, so the lightbox
+  goes at once: give the gallery an arrival under `photo-back`
+  (`html[data-turn-arriving="photo-back"] main { animation: appear 0.4s both }`), or it
+  shows at once under the shrinking photo, which reads as a flash.
 - `linkBack()` does the same for a link that leads back. With `match`, it plays from any
   page that shows the element, also one opened directly (from a search engine, a shared
   link): the page left needs nothing from before. Without `match`, the links that lead

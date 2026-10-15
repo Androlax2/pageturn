@@ -308,7 +308,13 @@ The rest of the page leaves and arrives under the morph's name, `product`, and
 ```css
 html[data-turn-leaving="product"] main { animation: fade 0.3s both; }
 html[data-turn-arriving="product"] .details > * { animation: rise 0.5s 0.25s both; }
+/* Back plays no leave: the shop comes in under the picture as it shrinks back. */
+html[data-turn-arriving="product-back"] main { animation: appear 0.4s both; }
 ```
+
+A page cannot hold the browser's Back, so the product page goes at once. Without an
+arrival of its own, the shop would then show at once under the picture, and the change
+reads as a flash.
 
 With Astro: `pageturn({ morph: true })`. With a bundler: `import "pageturn/morph/markup"`.
 
