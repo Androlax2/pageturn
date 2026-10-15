@@ -389,6 +389,8 @@ test("a link redirected on its way (a trailing slash added) still arrives by its
   });
   await page.goto("/t/a");
   await page.click("#old");
-  await page.waitForURL("**/t/b");
+  // Not waitForURL: WebKit reports the 204 as an aborted navigation, which it fails on.
+  await expect(page).toHaveURL(/\/t\/b$/);
+  await page.waitForLoadState("load");
   expect(await noted(page, "/t/b", "arriving")).toBe("card");
 });

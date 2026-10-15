@@ -88,10 +88,12 @@ test.describe("the core", () => {
     await page.click("#card");
     await page.waitForURL("**/t/product");
     expect(await noted(page, "/t/list", "during")).toBeUndefined();
-    expect(await firstFrame(page, "/t/product")).toEqual({
-      layer: CARD_BOX,
-      open: true,
-      hidden: "hidden",
+    const first = (await firstFrame(page, "/t/product")) as { layer: number[] };
+    expect(first).toMatchObject({ open: true, hidden: "hidden" });
+    // Where the page left it. WebKit draws its first frame once the travel has started:
+    // a pixel or two on, never a jump.
+    first.layer.forEach((value, index) => {
+      expect(Math.abs(value - (CARD_BOX[index] ?? 0))).toBeLessThanOrEqual(4);
     });
     await swapped(page, "#hero");
     expect(await noted(page, "/t/product", "during")).toEqual({
