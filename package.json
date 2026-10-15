@@ -1,6 +1,6 @@
 {
   "name": "pageturn",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Page transitions between real page loads, the same in every browser.",
   "license": "MIT",
   "author": "Théo Benoit",
