@@ -42,6 +42,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish to npm
+        id: publish
         if: steps.changesets.outputs.hasChangesets == 'false'
         run: |
           version=$(node -p 'require("./package.json").version')
@@ -51,13 +52,15 @@ jobs:
             # Trusted Publishing needs npm 11.5.1 or later.
             npm install --global npm@11
             pnpm run release
+            echo "published=true" >> "$GITHUB_OUTPUT"
           fi
       - name: Tag and release on GitHub
         if: steps.changesets.outputs.hasChangesets == 'false'
         run: |
           version=$(node -p 'require("./package.json").version')
           tag="pageturn@$version"
-          if npm view "pageturn@$version" version > /dev/null 2>&1 &&
+          # Just published, npm may not show the version for a few seconds yet.
+          if { [ "$PUBLISHED" = true ] || npm view "pageturn@$version" version > /dev/null 2>&1; } &&
             ! git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
             awk -v head="## $version" '$0 == head { on = 1; next } /^## / { on = 0 } on' \
               CHANGELOG.md > "$RUNNER_TEMP/notes.md"
@@ -66,3 +69,4 @@ jobs:
           fi
         env:
           GH_TOKEN: ${{ github.token }}
+          PUBLISHED: ${{ steps.publish.outputs.published }}
