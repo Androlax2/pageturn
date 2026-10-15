@@ -5,7 +5,9 @@ name: Release
 # got it, then tagged and released on GitHub with its CHANGELOG.md section.
 #
 # npm trusts this workflow (Trusted Publishing, set on npmjs.com for release.yml): no
-# token is stored anywhere, and the package says which commit and workflow built it.
+# token is stored anywhere, and the package says which commit and workflow built it. That
+# provenance comes with Trusted Publishing: asking for it again (publishConfig.provenance)
+# signs the same tarball twice, and the transparency log refuses the second (409).
 on:
   push:
     branches: [main]
