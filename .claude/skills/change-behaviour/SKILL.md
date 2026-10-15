@@ -25,7 +25,7 @@ description: Use when adding a feature to pageturn or changing what it does (a m
    - the public types in `src/common/types.ts` or `src/morph/types.ts`, with their doc
      comments, which are what an editor shows;
    - `pnpm changeset`: one or two sentences in the user's terms (`patch` for a fix,
-     `minor` for a feature while the version is 0.x).
+     `minor` for a feature, `major` only for a breaking change, decided with Théo).
 6. **Check:** `pnpm run check`, `pnpm run size` (raise a target only when the bytes are
    needed, and say how many), `pnpm run lint:package` when exports or files changed.
 7. **Examples:** if the change shows in an example, run `tests/examples/` and re-record

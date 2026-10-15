@@ -21,8 +21,9 @@ pageturn is released by Changesets and GitHub Actions. **Never run `npm publish`
    A morph defined from a classic script in the head now lands on the page reached.
    ```
 
-   `patch` for a fix, `minor` for a feature or a breaking change while the version is
-   0.x. Written for users: what they see, not how the code changed.
+   `patch` for a fix, `minor` for a feature, `major` for a change that breaks the public
+   API (what users import, the marks on `<html>`, the events, the contract), which
+   needs Théo's decision. Written for users: what they see, not how the code changed.
 2. On `main`, `.github/workflows/release.yml` opens or updates a "Version Packages" pull
    request: the version bumped, `CHANGELOG.md` written from the changesets.
 3. Before it is merged, the release checklist is done by hand on the packed version

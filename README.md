@@ -30,7 +30,8 @@ goes wrong, you get an ordinary page load.
   classic script 4.2 kB. Nothing moves under `prefers-reduced-motion`, and no other host
   is contacted.
 
-> **Status:** not published yet. What pageturn does in every situation is in
+> **Status:** stable. The public API follows semantic versioning: a minor or patch
+> release never breaks it. What pageturn does in every situation is in
 > [docs/contract.md](docs/contract.md).
 
 ## Contents
