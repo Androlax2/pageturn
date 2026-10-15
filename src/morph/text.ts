@@ -1,6 +1,6 @@
 /** The `text()` part of pageturn/morph. */
 
-import { atTheirEnd } from "./end.ts";
+import { atTheirEnd, cornersCss, ownCorners } from "./end.ts";
 import { LAYER_STYLE } from "./layer.ts";
 import type { Box, End } from "./place.ts";
 import { over } from "./timing.ts";
@@ -149,7 +149,7 @@ export function text(options: TextOptions = {}): Kind {
             width: width ?? 0,
             height: height ?? 0,
           };
-          end.radius = Number.parseFloat(drawn.borderTopLeftRadius) || 0;
+          end.radius = ownCorners(drawn, width ?? 0);
           end.background = drawn.backgroundColor;
         }
       }
@@ -233,7 +233,7 @@ export function text(options: TextOptions = {}): Kind {
               top: `${box.top - top}px`,
               width: `${box.width}px`,
               height: `${box.height}px`,
-              borderRadius: `${radius}px`,
+              borderRadius: cornersCss(radius),
               backgroundColor: background ?? "transparent",
             },
           },

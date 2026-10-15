@@ -1,5 +1,5 @@
 /** The `turned()` part of pageturn/morph. */
-import { endOf, radiusOf } from "./end.ts";
+import { endOf, ownCorners } from "./end.ts";
 import type { Part } from "./types.ts";
 
 /** The rotation and scale of a style's own transforms, as a matrix. */
@@ -50,7 +50,7 @@ export function turned(): Part {
           height,
         },
         rotate,
-        radius: radiusOf(element, width, scaleX),
+        radius: ownCorners(getComputedStyle(element), width, scaleX),
       };
     };
   };

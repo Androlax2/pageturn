@@ -8,6 +8,7 @@ export { back } from "./back.ts";
 export { behind } from "./behind.ts";
 export { copy } from "./copy.ts";
 export { defineMorph } from "./define.ts";
+export type { Corners } from "./end.ts";
 export { here, seen } from "./finders.ts";
 export { linkBack } from "./link-back.ts";
 export { peek } from "./peek.ts";

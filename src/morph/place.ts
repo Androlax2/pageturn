@@ -14,6 +14,7 @@ import {
 } from "../common/page.ts";
 import { readSession, removeSession } from "../common/session.ts";
 import type { Json } from "../common/types.ts";
+import type { Corners } from "./end.ts";
 
 export interface Box {
   left: number;
@@ -26,8 +27,11 @@ export interface Box {
 export interface End {
   /** Where the element is drawn, in viewport pixels. */
   box: Box;
-  /** Its corner radius as drawn, in pixels. */
-  radius: number;
+  /**
+   * Its corners as drawn, in pixels: one radius for all four, or four, from the
+   * top-left corner clockwise. Read as seen: a parent that rounds them counts.
+   */
+  radius: number | Corners;
   /** Degrees it is seen turned by: read by turned() only. */
   rotate?: number;
   /** A picture's `sizes`, for the layer to ask for the same file. */

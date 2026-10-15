@@ -1,5 +1,6 @@
 /** pageturn/morph: the core: a picture from a page to the next, before or after the page changes. */
 import { expect, test } from "@playwright/test";
+import { seekTravel } from "../../src/testing/testing.ts";
 import { noted, notes, type PageSpec, serve } from "../support/site.ts";
 import {
   boxOf,
@@ -689,4 +690,96 @@ test("a layer handed over that cannot be read hides nothing and throws nothing",
         getComputedStyle(document.getElementById("hero") as Element).visibility,
     ),
   ).toBe("visible");
+});
+
+test.describe("corners, as they are seen", () => {
+  /** A card that rounds the top of its picture by clipping it: the picture has no radius. */
+  const clippedCard = (picture = "") =>
+    `<a id="card" href="/t/product" style="position: absolute; left: 20px; top: 40px; display: block; width: 120px; border: 1px solid #ccc; border-radius: 18px; overflow: hidden"><img id="thumb" alt="" src="${svg(120, 60)}" style="display: block; width: 120px; height: 60px; ${picture}"><span style="display: block; height: 20px">Lamp</span></a>`;
+
+  const corners = `during(play) {
+    note("corners", { back: play.back, start: play.start.radius, stop: play.stop.radius });
+  },
+  use: [back()],`;
+
+  test("a parent that clips the picture rounds the corners it shares with it, there and back", async ({
+    page,
+    context,
+  }) => {
+    await serve(
+      context,
+      shop({ options: corners, list: { body: clippedCard() } }),
+    );
+    await page.goto("/t/list");
+    await ready(page);
+    await page.click("#card");
+    await page.waitForURL("**/t/product");
+    // Inside the card's 1px border, its 18px corners are 17px; the bottom is not the card's.
+    await expect
+      .poll(() => noted(page, "/t/product", "corners"))
+      .toEqual({ back: false, start: [17, 17, 0, 0], stop: 20 });
+    await swapped(page, "#hero");
+
+    await page.goBack();
+    await page.waitForURL("**/t/list");
+    await expect
+      .poll(() => noted(page, "/t/list", "corners"))
+      .toEqual({ back: true, start: 20, stop: [17, 17, 0, 0] });
+  });
+
+  test("the layer is clipped corner by corner, held at its start", async ({
+    page,
+    context,
+  }) => {
+    await serve(
+      context,
+      shop({
+        options: `find: () => (${HERO_END}), duration: 5000,`,
+        list: { body: clippedCard() },
+        product: { stays: true },
+      }),
+    );
+    await page.goto("/t/list");
+    await ready(page);
+    await page.evaluate(() => document.getElementById("card")?.click());
+    expect(await seekTravel(page, 0)).toBe(true);
+    // The layer is the hero's size scaled down to the card's picture: its corners too.
+    const clip = await page.evaluate(
+      () =>
+        getComputedStyle(
+          document.querySelector("html > [data-turn-layer]") as Element,
+        ).clipPath,
+    );
+    const radii = /round (.*)\)$/
+      .exec(clip)?.[1]
+      ?.split(" ")
+      .map(Number.parseFloat);
+    // 17px at a scale of 120 / 400, on the top corners only.
+    expect(radii?.map(Math.round)).toEqual([57, 57, 0, 0]);
+  });
+
+  test("an element's own corners are kept one by one", async ({
+    page,
+    context,
+  }) => {
+    await serve(
+      context,
+      shop({
+        options: corners,
+        list: {
+          body: CARD.replace(
+            "border-radius: 6px",
+            "border-radius: 12px 0 12px 0",
+          ),
+        },
+      }),
+    );
+    await page.goto("/t/list");
+    await ready(page);
+    await page.click("#card");
+    await page.waitForURL("**/t/product");
+    await expect
+      .poll(() => noted(page, "/t/product", "corners"))
+      .toEqual({ back: false, start: [12, 0, 12, 0], stop: 20 });
+  });
 });

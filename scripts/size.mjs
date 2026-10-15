@@ -57,10 +57,10 @@ const PARTS = [
   ],
   // pageturn/morph as a site ships it, with only what it imports and without the kernel,
   // which the page has already. The core, then what each part adds to it.
-  ["pageturn/morph, the core", 4950, () => using("defineMorph")],
+  ["pageturn/morph, the core", 5300, () => using("defineMorph")],
   [
     "pageturn/morph, the core with here()",
-    5000,
+    5350,
     () => using("defineMorph, here"),
   ],
   ...[
@@ -79,7 +79,7 @@ const PARTS = [
     target,
     async () => added(await using(`defineMorph, ${names}`)),
   ]),
-  ["pageturn/morph, all of it", 10050, () => bundled("morph.js", true)],
+  ["pageturn/morph, all of it", 10400, () => bundled("morph.js", true)],
   ["morph-head.js", 1350, () => readFile(`${DIST}morph-head.js`)],
   // The morph from the markup, as a bundler ships it beside a site's own morphs: what it
   // adds to the core with seen() and back().
@@ -93,7 +93,7 @@ const PARTS = [
     },
   ],
   // For a site without a bundler: the morph, its head half and the markup's, whole.
-  ["pageturn-morph.js", 10500, () => readFile(`${DIST}pageturn-morph.js`)],
+  ["pageturn-morph.js", 10800, () => readFile(`${DIST}pageturn-morph.js`)],
   [
     "head-core.js with its morph half",
     2550,

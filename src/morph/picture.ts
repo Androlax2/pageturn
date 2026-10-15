@@ -1,5 +1,5 @@
 /** The core's kind, `picture`: what a morph is made of when it says no other. */
-import { within } from "./end.ts";
+import { cornersCss, within } from "./end.ts";
 import {
   CONTENT_STYLE,
   centredOn,
@@ -170,7 +170,7 @@ export const picture: Kind = {
           scale: `${cover}`,
         },
         look: {
-          clipPath: `inset(${(height - box.height / cover) / 2}px ${(width - box.width / cover) / 2}px round ${radius / cover}px)`,
+          clipPath: `inset(${(height - box.height / cover) / 2}px ${(width - box.width / cover) / 2}px round ${cornersCss(radius, cover)})`,
         },
         on: layer,
         inner: { look: { scale: `${zoom}` }, on: held },

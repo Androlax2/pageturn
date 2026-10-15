@@ -1,4 +1,6 @@
 /** The `copy()` part of pageturn/morph. */
+
+import { cornersCss } from "./end.ts";
 import {
   CONTENT_STYLE,
   centredOn,
@@ -42,7 +44,9 @@ export function copy(): Kind {
             rotate: `${rotate}deg`,
             scale: `${x} ${y}`,
           },
-          look: { borderRadius: `${radius / x}px / ${radius / y}px` },
+          look: {
+            borderRadius: `${cornersCss(radius, x)} / ${cornersCss(radius, y)}`,
+          },
           on: layer.firstElementChild as HTMLElement,
         };
       };

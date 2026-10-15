@@ -573,7 +573,7 @@ defineMorph("photo", {
 
 | Part | What it adds | gzipped |
 | --- | --- | --- |
-| the core | A picture, cropped and never stretched, from one page to the next | 4.9 kB |
+| the core | A picture, cropped and never stretched, from one page to the next | 5.3 kB |
 | `seen()`, `here()`, `peek()` | Where the element lands, known before the page changes | 0.2–0.6 kB |
 | `back()` | Plays backwards on the browser's Back | 1.3 kB |
 | `linkBack()` | Plays backwards on a link back, even from a page opened directly | 1.5 kB |

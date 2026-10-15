@@ -17,22 +17,99 @@ export const within = <T>(
 export const isEnding = (animation: Animation): boolean =>
   Number.isFinite(animation.effect?.getComputedTiming().endTime);
 
+/** The four corners of an end: top-left, top-right, bottom-right, bottom-left. */
+export type Corners = readonly [number, number, number, number];
+
+const CORNERS = ["TopLeft", "TopRight", "BottomRight", "BottomLeft"] as const;
+
+/** An end's corners, four of them, whether it says one radius for all or four. */
+export const cornersOf = (radius: number | Corners): Corners =>
+  typeof radius === "number" ? [radius, radius, radius, radius] : radius;
+
+/** One radius when the four corners agree, the four otherwise: an end stays plain. */
+const radiusOf = (corners: Corners): number | Corners =>
+  corners.every((corner) => corner === corners[0]) ? corners[0] : corners;
+
 /**
- * An element's corner radius, in pixels, for a box that wide: a percentage is of its
+ * The corners a style draws, in pixels, for a box that wide: a percentage is of its
  * width; a length is drawn at the scale the element is held at.
  */
-export function radiusOf(element: Element, width: number, scale = 1): number {
-  const corner = getComputedStyle(element).borderTopLeftRadius;
-  const radius = Number.parseFloat(corner) || 0;
-  return corner.includes("%") ? (radius / 100) * width : radius * scale;
+export function ownCorners(
+  style: CSSStyleDeclaration,
+  width: number,
+  scale = 1,
+): number | Corners {
+  return radiusOf(
+    CORNERS.map((corner) => {
+      const value = style[`border${corner}Radius`];
+      const radius = Number.parseFloat(value) || 0;
+      return value.includes("%") ? (radius / 100) * width : radius * scale;
+    }) as unknown as Corners,
+  );
 }
 
-/** An element measured as an end: the rectangle it is drawn in, and its corners. */
+/** An end's corners as CSS writes them, each divided by the scale the layer is held at. */
+export const cornersCss = (radius: number | Corners, scale = 1): string =>
+  cornersOf(radius)
+    .map((corner) => `${corner / scale}px`)
+    .join(" ");
+
+/**
+ * An element's corners as they are seen: its own, or rounder where an ancestor that
+ * clips it (a card with `overflow: hidden`) has its corner on the element's. That
+ * ancestor clips at its padding edge, inside its border, where its radius is smaller.
+ */
+function seenCorners(element: Element, box: DOMRect): number | Corners {
+  const corners = [
+    ...cornersOf(ownCorners(getComputedStyle(element), box.width)),
+  ];
+  const near = (one: number, other: number): boolean =>
+    Math.abs(one - other) < 1;
+  for (
+    let clip = element.parentElement;
+    clip && clip !== document.body;
+    clip = clip.parentElement
+  ) {
+    const style = getComputedStyle(clip);
+    if (
+      style.overflow === "visible" &&
+      !/paint|strict|content/.test(style.contain)
+    ) {
+      continue;
+    }
+    const edge = clip.getBoundingClientRect();
+    const left = edge.left + clip.clientLeft;
+    const top = edge.top + clip.clientTop;
+    const right = near(box.right, left + clip.clientWidth);
+    const bottom = near(box.bottom, top + clip.clientHeight);
+    const atLeft = near(box.left, left);
+    const atTop = near(box.top, top);
+    const radii = cornersOf(ownCorners(style, edge.width));
+    const border = Math.max(clip.clientLeft, clip.clientTop);
+    [
+      atLeft && atTop,
+      right && atTop,
+      right && bottom,
+      atLeft && bottom,
+    ].forEach((meets, index) => {
+      if (meets) {
+        corners[index] = Math.max(
+          corners[index] ?? 0,
+          (radii[index] ?? 0) - border,
+        );
+      }
+    });
+  }
+  return radiusOf(corners as unknown as Corners);
+}
+
+/** An element measured as an end: the rectangle it is drawn in, and its corners as seen. */
 export function endOf(element: Element): End {
-  const { left, top, width, height } = element.getBoundingClientRect();
+  const rect = element.getBoundingClientRect();
+  const { left, top, width, height } = rect;
   const end: End = {
     box: { left, top, width, height },
-    radius: radiusOf(element, width),
+    radius: seenCorners(element, rect),
   };
   const picture = (
     element.matches("img") ? element : element.querySelector("img")
@@ -56,7 +133,7 @@ export const looksSame = (one: End, other: End): boolean => {
     end.box.top,
     end.box.width,
     end.box.height,
-    end.radius,
+    ...cornersOf(end.radius),
     end.rotate ?? 0,
     end.text?.box.left ?? 0,
     end.text?.box.top ?? 0,

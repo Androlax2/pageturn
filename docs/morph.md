@@ -58,8 +58,10 @@ picture is hidden under it, the layer travels to that picture's place, and the t
 swapped.
 
 The layer is cropped, never stretched: a square thumbnail becomes a wide picture by its
-crop opening, and the corners go from one radius to the other. A picture with `srcset`
-asks for the file its new size needs. What the page had drawn stays on the layer until
+crop opening, and the corners go from one end's to the other's, each on its own. A
+corner is read as it is seen: a card with `overflow: hidden` that rounds the top of its
+picture rounds the layer's top too, and the travel lands on those corners on the way
+back. A picture with `srcset` asks for the file its new size needs. What the page had drawn stays on the layer until
 that file has come: the travel starts at the click and never waits for the network.
 
 If `from` or `to` is a frame that holds its picture larger than itself (a hover's zoom),
@@ -206,7 +208,7 @@ Each is an import of `pageturn/morph`. Sizes are gzipped, as a bundler ships the
 
 | | Size | |
 | --- | --- | --- |
-| `defineMorph` | 4.7 kB | The core: a picture from a page to the next |
+| `defineMorph` | 5.3 kB | The core: a picture from a page to the next |
 | `here()` | 35 B | Finder: this page has the element too |
 | `seen()` | 0.25 kB | Finder: where a page last showed it |
 | `peek()` | 0.6 kB | Finder: looks at the destination |
@@ -346,7 +348,8 @@ defineMorph("product", {
   `return decline()` declines: the default move plays. `measure(element)` reads an element the way
   the morph does; `measure(element, other)` reads it as it would be drawn where the
   other is, its corner (its first word, for text) on the other's: for an end that is
-  not where its element is. An end is plain data: `box`, `radius`, and when they apply `rotate`,
+  not where its element is. An end is plain data: `box`, `radius` (one number for four
+  equal corners, or four from the top-left clockwise), and when they apply `rotate`,
   `zoom`, `shadow`, `background`, and `opacity`. Set `from.opacity = 0` for an end where
   nothing is drawn (a picture that is not on the page until its link is clicked): the
   layer fades in from it, or out to it on the way back. An element that is not laid out
