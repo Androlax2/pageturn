@@ -1,5 +1,11 @@
 # pageturn
 
+## 0.1.1
+
+### Patch Changes
+
+- d71215f: A fuller package description and keywords, so pageturn is found on npm.
+
 ## 0.1.0
 
 ### Minor Changes
