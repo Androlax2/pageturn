@@ -1,5 +1,40 @@
 # pageturn
 
+## 0.2.0
+
+### Minor Changes
+
+- f03333d: Warnings in development: in the build package.json's `development` condition serves,
+  pageturn says in the console why a move did not play (no head script, reduced motion, a
+  client router with no adapter, a return by Back with no animation, a router's own view
+  transition alongside pageturn's). Production builds carry none of it.
+- f03333d: Next.js: `pageturn/next` plays pageturn's moves on the App Router. Its `Link` (as
+  `next/link`) and `usePageturnRouter()` (as `useRouter()`) play the leave before the router
+  navigates, and `<Pageturn />` in the root layout says when each page is in the DOM. On
+  any client router, the page reached is now recorded where the router shows it, base path
+  and trailing slash included, so a return by Back finds its `returnAs` there too.
+- f03333d: Nuxt: the `pageturn/nuxt` module puts the head script in every page, adds the stylesheet,
+  and plays pageturn's moves on Nuxt's navigations (`<NuxtLink>`, `navigateTo()`, Back and
+  Forward), the page reached arriving once Nuxt's `<Suspense>` has resolved.
+- 3b16406: Only `decline()` declines: a move's `leave` or a morph's `ends` that answers `false`, the
+  form from before `decline()`, now declines nothing (the types already refused it). Return
+  `turn.decline()` or `decline()` instead.
+- f03333d: React Router: `pageturnMiddleware` on the root route and `usePageturn()` in the root
+  layout play pageturn's moves on React Router's navigations (`<Link>`, `navigate()`, Back
+  and Forward), the route's loaders running during the leave. `react` and `react-router`
+  are optional peer dependencies, used by this adapter only.
+- f03333d: SvelteKit: `pageturn/sveltekit` plays pageturn's moves on SvelteKit's own navigations
+  (links, `goto()`, Back and Forward), and `pageturn/sveltekit/server` puts the head script
+  in every page. Every module of pageturn can now be imported on a server, where it does
+  nothing: a framework's layouts run there too.
+- f03333d: Turbo: `pageturn/turbo` plays pageturn's moves on Turbo Drive's visits (links, forms,
+  `Turbo.visit()`, Back and Forward), holding Turbo's render until the leave has ended. On
+  a page Turbo has cached, the preview is not shown under the leave.
+- f03333d: Vue Router: `pageturn/vue` plays pageturn's moves on the router's navigations
+  (`<RouterLink>`, `router.push()`, Back and Forward). On any client router, a navigation
+  to a place in the same page plays no move, and one started from code plays the default
+  move rather than asking each move's `match`.
+
 ## 0.1.1
 
 ### Patch Changes
