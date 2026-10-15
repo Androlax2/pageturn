@@ -106,7 +106,7 @@ test.describe("text(), peek() and behind()", () => {
         sheet: "none",
         body: HEADLINE,
         head: headline(
-          `find: peek({ wait: 1, warm: false }), ends: ({ to }) => to !== null,`,
+          `find: peek({ wait: 1, warm: false }), ends: ({ to }, { decline }) => (to ? undefined : decline()),`,
         ),
       },
     });

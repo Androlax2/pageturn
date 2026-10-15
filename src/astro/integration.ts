@@ -37,9 +37,9 @@ export interface PageturnOptions extends Settings {
 }
 
 /** Where the external head script is served, under the site's base. */
-export const HEAD_SCRIPT_PATH = "_pageturn/head.js";
+const HEAD_SCRIPT_PATH = "_pageturn/head.js";
 /** The same with its morph half, for the pages that have it. */
-export const MORPH_HEAD_SCRIPT_PATH = "_pageturn/head-morph.js";
+const MORPH_HEAD_SCRIPT_PATH = "_pageturn/head-morph.js";
 
 /** Gives Head.astro, the middleware and the head route the head script these options need. */
 const HEAD_MODULE = "virtual:pageturn/head";

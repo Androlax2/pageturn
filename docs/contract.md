@@ -46,7 +46,7 @@ A chooser or a `match` that throws is reported, and the default move plays.
 | --- | --- |
 | `pageturn:leaving` is cancelled | Normal navigation, no attribute, no mark |
 | `leave` answers nothing | The CSS half plays if the move has not started it, then the page is left, marked with the move's name |
-| `leave` answers `turn.decline()` | Declined: the default move plays in its place. `pageturn:leaving` is not fired again. (`false`, the earlier form, is still read as a decline) |
+| `leave` answers `turn.decline()` | Declined: the default move plays in its place. `pageturn:leaving` is not fired again. `false` is not a decline: it is read as nothing |
 | `leave` answers a handover | The page is left now, with it |
 | The page is still arriving | Its arrival ends as the CSS half starts |
 | The CSS half starts no animation | Nothing to wait for: the page is left at once |
@@ -209,7 +209,7 @@ The Vue Router rows, on Nuxt's router, and:
 
 | Situation | What happens |
 | --- | --- |
-| pageturn's `Link`, `useTurnRouter().push()` | Next's navigation is stopped, the leave plays while the page is prefetched, then the router navigates; the page arrives as `<Pageturn />` sees it |
+| pageturn's `Link`, `usePageturnRouter().push()` | Next's navigation is stopped, the leave plays while the page is prefetched, then the router navigates; the page arrives as `<Pageturn />` sees it |
 | A `Link` whose own `onNavigate` calls `preventDefault()` | Nothing: no leave, no navigation |
 | A plain `next/link`, a bare `router.push`, Back and Forward | No leave. The page arrives: under its `returnAs` on Back when it has one, plainly otherwise |
 | A navigation overtaken during its leave | Its move's `stay` hears `superseded`, and the router is never asked to go there |

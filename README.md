@@ -221,15 +221,15 @@ export default function Layout({ children }) {
 ```
 
 ```jsx
-import { Link, useTurnRouter } from "pageturn/next";
+import { Link, usePageturnRouter } from "pageturn/next";
 
 <Link href="/work">Work</Link>;              // as next/link
-const router = useTurnRouter();               // as useRouter()
+const router = usePageturnRouter();               // as useRouter()
 router.push("/work");
 ```
 
 Next's router cannot wait for a leave, so pageturn's `Link` stops its navigation, plays
-the leave while the page is prefetched, then asks the router again; `useTurnRouter()`
+the leave while the page is prefetched, then asks the router again; `usePageturnRouter()`
 does the same from code. `<Pageturn />` says when each page is in the DOM. Back and
 Forward, a plain `next/link` and a bare `router.push` still work: the page arrives (under
 its `returnAs` on Back), with no leave. Put the head script in a plain inline `<script>`:
@@ -835,7 +835,7 @@ scroll layer to stop):
 | `pageturn/vue` | The Vue Router adapter: `pageturn(router)`, with the kernel |
 | `pageturn/nuxt` | The Nuxt module: the head script, the stylesheet, and the Vue Router adapter on Nuxt's router |
 | `pageturn/react-router` | The React Router adapter: `pageturnMiddleware` and `usePageturn()`, with the kernel |
-| `pageturn/next` | The Next.js App Router adapter: `Link`, `useTurnRouter()` and `<Pageturn />`, with the kernel |
+| `pageturn/next` | The Next.js App Router adapter: `Link`, `usePageturnRouter()` and `<Pageturn />`, with the kernel |
 | `pageturn/testing` | For browser tests of a morph: the layer's parts by name, a travel held at a time or at its end |
 | `pageturn/astro` | The Astro integration |
 

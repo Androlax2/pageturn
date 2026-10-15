@@ -3,10 +3,10 @@
  * pageturn/next: pageturn's moves on Next.js's App Router. The router cannot wait for a
  * leave, so the adapter stops its navigation, plays the leave, then asks the router again:
  *
- *   import { Link, Pageturn, useTurnRouter } from "pageturn/next";
+ *   import { Link, Pageturn, usePageturnRouter } from "pageturn/next";
  *   // app/layout: <body><Pageturn />{children}</body>
  *   // links: <Link href="/work">Work</Link>, as next/link
- *   // from code: const router = useTurnRouter(); router.push("/work");
+ *   // from code: const router = usePageturnRouter(); router.push("/work");
  *
  * A plain next/link, a bare router.push, Back and Forward still work: the page arrives,
  * with no leave. The kernel comes with it (pageturn/core), for the links Next leaves to
@@ -95,7 +95,7 @@ export function Link(props: ComponentProps<typeof NextLink>) {
 }
 
 /** The App Router, whose push and replace play the leave first. */
-export function useTurnRouter(): Router {
+export function usePageturnRouter(): Router {
   const router = useRouter();
   return useMemo(
     () => ({

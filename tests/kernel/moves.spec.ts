@@ -94,7 +94,7 @@ test("a move that declines gives way to the default move", async ({
   await serve(context, {
     a: {
       body: `<a id="card" href="/t/b" data-turn="card">card</a>`,
-      script: `pageturn.defineMove("card", { leave: () => false });`,
+      script: `pageturn.defineMove("card", { leave: (turn) => turn.decline() });`,
     },
     b: {},
   });
@@ -437,7 +437,7 @@ test("pageturn:leave fires once when a move declines", async ({
     a: {
       body: `<a id="card" href="/t/b" data-turn="card">card</a>`,
       script: `
-        pageturn.defineMove("card", { leave: () => false });
+        pageturn.defineMove("card", { leave: (turn) => turn.decline() });
         document.addEventListener("pageturn:leaving", (event) => note("leave event", event.detail.move));`,
     },
     b: {},

@@ -39,7 +39,7 @@ locally.
 | `src/vue/` | The Vue Router adapter (the router engine on its guards), which pageturn/nuxt builds on |
 | `src/nuxt/` | The Nuxt module (Node) and the client plugin it adds |
 | `src/react-router/` | The React Router adapter: a root middleware and a layout hook |
-| `src/next/` | The Next.js App Router adapter: its `Link`, `useTurnRouter()` and `<Pageturn />` (a client module, `"use client"`) |
+| `src/next/` | The Next.js App Router adapter: its `Link`, `usePageturnRouter()` and `<Pageturn />` (a client module, `"use client"`) |
 | `src/classic/` | `pageturn.js` and `pageturn-morph.js`, for sites with no bundler |
 | `src/astro/` | The Astro integration |
 | `src/testing/` | `pageturn/testing`, for a site's own browser tests of a morph |

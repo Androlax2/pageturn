@@ -1,8 +1,8 @@
 "use client";
-import { useTurnRouter } from "pageturn/next";
+import { usePageturnRouter } from "pageturn/next";
 
 export default function C() {
-  const router = useTurnRouter();
+  const router = usePageturnRouter();
   return (
     <div>
       <h1>c</h1>

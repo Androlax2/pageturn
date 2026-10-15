@@ -450,7 +450,7 @@ test.describe("the core", () => {
     await swapped(page, "#hero");
   });
 
-  test("ends may move an end, and declines with decline(), or false, the earlier answer", async ({
+  test("ends may move an end, and declines with decline() only", async ({
     page,
     context,
   }) => {
@@ -498,13 +498,13 @@ test.describe("the core", () => {
     expect(await noted(page, "/t/product", "arriving")).toBe("page");
     expect(await firstFrame(page, "/t/product")).toMatchObject({ layer: null });
 
-    // false, still read as a decline at run time.
+    // false, the answer before decline(), declines nothing: the morph plays.
     await page.goto("/t/old");
     await ready(page);
     await forget(page);
     await page.click("#card");
     await page.waitForURL("**/t/product");
-    expect(await noted(page, "/t/product", "arriving")).toBe("page");
+    expect(await noted(page, "/t/product", "arriving")).toBe("product");
   });
 
   test("it plays without the head script's morph half, from when the module has loaded", async ({

@@ -112,7 +112,7 @@ React Router's `viewTransition`, Next.js's experimental view transitions, Turbo'
   navigation (unless the site's own `onNavigate` did), starts the leave with the
   rendered anchor's address (the base path Next adds), prefetches the page, and calls
   `router.push` or `router.replace` once `left` resolves, unless another navigation
-  started meanwhile. `useTurnRouter()` does the same from code. `<Pageturn />`, in the
+  started meanwhile. `usePageturnRouter()` does the same from code. `<Pageturn />`, in the
   root layout, calls `swapped()` from a layout effect on the path and query; a page it
   did not start (Back, Forward, a plain `next/link`) arrives through `via: "history"`,
   under its `returnAs` when it has one, plainly otherwise.

@@ -60,6 +60,6 @@ holder[KEY] ??= {
 
 export const registry: Registry = holder[KEY];
 
-/** A refusal: a `decline()`, or `false`, the earlier answer, still read as one. */
+/** A refusal: what every `decline()` returns, and nothing else. */
 export const isDeclined = (answer: unknown): boolean =>
-  answer === registry.declined || answer === false;
+  answer === registry.declined;

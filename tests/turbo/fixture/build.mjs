@@ -34,9 +34,12 @@ const NOTES = `<script>
       preview: root.hasAttribute("data-turbo-preview"),
     }),
   ).observe(root, { attributeFilter: ["data-turn-leaving", "data-turn-arriving"] });
-  new MutationObserver(() => {
-    if (root.hasAttribute("data-turbo-preview")) note("preview", location.pathname);
-  }).observe(root, { attributeFilter: ["data-turbo-preview"] });
+  // Read from the records: a browser may set and remove it in one task, before this runs.
+  new MutationObserver((records) => {
+    if (root.hasAttribute("data-turbo-preview") || records.some((r) => r.oldValue !== null)) {
+      note("preview", location.pathname);
+    }
+  }).observe(root, { attributeFilter: ["data-turbo-preview"], attributeOldValue: true });
   document.addEventListener("pageturn:stayed", (event) =>
     note("stay", { move: event.detail.turn.move, reason: event.detail.stay.reason }));
   document.addEventListener("pageturn:arrived", (event) => note("arrived", event.detail));

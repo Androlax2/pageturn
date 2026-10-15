@@ -44,7 +44,7 @@ test("a move's data reaches the page the router renders", async ({ page }) => {
   });
 });
 
-test("useTurnRouter().push() plays the default move, not a link's", async ({
+test("usePageturnRouter().push() plays the default move, not a link's", async ({
   page,
 }) => {
   await open(page);
