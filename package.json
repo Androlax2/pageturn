@@ -1,6 +1,6 @@
 {
   "name": "pageturn",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Page transitions between real page loads, in every browser: a default move, moves named in CSS or written in code, a picture that morphs into the next page, and returns on Back. No router, no swapped DOM.",
   "license": "MIT",
   "author": "Théo Benoit",
