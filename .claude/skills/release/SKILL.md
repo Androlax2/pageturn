@@ -27,8 +27,10 @@ pageturn is released by Changesets and GitHub Actions. **Never run `npm publish`
    request: the version bumped, `CHANGELOG.md` written from the changesets.
 3. Before it is merged, the release checklist is done by hand on the packed version
    (`pnpm pack`): `docs/release-checklist.md`.
-4. Merging it publishes to npm with provenance (`pnpm run release`: build,
-   `lint:package`, `changeset publish`), using the repository's `NPM_TOKEN`.
+4. Merging it makes `main` a release: the workflow publishes the version with
+   `npm publish` (`pnpm run release`) if npm has not got it, through npm's Trusted
+   Publishing (no token), with provenance; then it creates the tag `pageturn@<version>`
+   and the GitHub release from that version's section of `CHANGELOG.md`.
 
 ## Checks to run when preparing one
 

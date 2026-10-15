@@ -1,7 +1,7 @@
 {
   "name": "pageturn",
   "version": "0.1.0",
-  "description": "Page transitions between real page loads, the same in every browser.",
+  "description": "Page transitions between real page loads, in every browser: a default move, moves named in CSS or written in code, a picture that morphs into the next page, and returns on Back. No router, no swapped DOM.",
   "license": "MIT",
   "author": "Théo Benoit",
   "repository": {
@@ -11,11 +11,22 @@
   "homepage": "https://github.com/Androlax2/pageturn#readme",
   "bugs": "https://github.com/Androlax2/pageturn/issues",
   "keywords": [
-    "page transitions",
-    "view transitions",
+    "page-transitions",
+    "page-transition",
+    "transitions",
+    "view-transitions",
+    "view-transition-api",
+    "cross-document-view-transitions",
+    "mpa",
+    "multi-page",
     "navigation",
+    "animation",
+    "morph",
+    "shared-element-transition",
+    "astro",
     "astro-integration",
-    "mpa"
+    "vanilla-js",
+    "no-dependencies"
   ],
   "type": "module",
   "packageManager": "pnpm@11.28.4",
@@ -33,7 +44,7 @@
     "lint:package": "publint --strict && attw --pack . --profile esm-only --exclude-entrypoints ./astro/Head.astro ./pageturn.css ./no-native.css ./pageturn.js ./pageturn-morph.js ./morph-head.js",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "pnpm run build && pnpm run lint:package && changeset publish",
+    "release": "pnpm run build && pnpm run lint:package && npm publish",
     "prepack": "node scripts/build.mjs"
   },
   "sideEffects": true,

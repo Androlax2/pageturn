@@ -1,7 +1,11 @@
 name: Release
 
-# On main: with changesets waiting, opens or updates the "Version Packages" pull request;
-# once that is merged, publishes the new version to npm, with provenance.
+# On main: with changesets waiting, opens or updates the "Version Packages" pull request.
+# Once it is merged, main is a release: its version is published to npm, if npm has not
+# got it, then tagged and released on GitHub with its CHANGELOG.md section.
+#
+# npm trusts this workflow (Trusted Publishing, set on npmjs.com for release.yml): no
+# token is stored anywhere, and the package says which commit and workflow built it.
 on:
   push:
     branches: [main]
@@ -11,7 +15,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 permissions:
   contents: write
   pull-requests: write
-  # npm provenance: the published package says which commit and workflow built it.
+  # Trusted Publishing and provenance: npm reads who publishes from this token.
   id-token: write
 
 jobs:
@@ -28,12 +32,35 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check
       - uses: changesets/action@v1
+        id: changesets
         with:
           version: pnpm run version
-          publish: pnpm run release
           title: Version Packages
           commit: Version Packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to npm
+        if: steps.changesets.outputs.hasChangesets == 'false'
+        run: |
+          version=$(node -p 'require("./package.json").version')
+          if npm view "pageturn@$version" version > /dev/null 2>&1; then
+            echo "pageturn@$version is on npm already."
+          else
+            # Trusted Publishing needs npm 11.5.1 or later.
+            npm install --global npm@11
+            pnpm run release
+          fi
+      - name: Tag and release on GitHub
+        if: steps.changesets.outputs.hasChangesets == 'false'
+        run: |
+          version=$(node -p 'require("./package.json").version')
+          tag="pageturn@$version"
+          if npm view "pageturn@$version" version > /dev/null 2>&1 &&
+            ! git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
+            awk -v head="## $version" '$0 == head { on = 1; next } /^## / { on = 0 } on' \
+              CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+            gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" \
+              --notes-file "$RUNNER_TEMP/notes.md"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}

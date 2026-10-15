@@ -1,5 +1,10 @@
 # pageturn
 
+[![npm](https://img.shields.io/npm/v/pageturn)](https://www.npmjs.com/package/pageturn)
+[![CI](https://github.com/Androlax2/pageturn/actions/workflows/ci.yml/badge.svg)](https://github.com/Androlax2/pageturn/actions/workflows/ci.yml)
+[![gzip size of pageturn.js](https://img.shields.io/badge/pageturn.js-4.2%20kB%20gzip-informational)](scripts/size.mjs)
+[![MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 Page transitions between real page loads, the same in every browser.
 
 ![A product picture grows from the shop's grid into its product page, and shrinks back into its place on Back](docs/media/morph.gif)

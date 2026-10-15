@@ -7,21 +7,23 @@ release candidate: the packed tarball, `pnpm pack`, which builds `dist/` first (
 ## How a release happens
 
 1. Each change a user will notice comes with a changeset (`pnpm changeset`), merged with
-   it. The first release's is `.changeset/first-release.md`.
+   it.
 2. On `main`, the release workflow (`.github/workflows/release.yml`) opens or updates a
    "Version Packages" pull request: the version bumped, `CHANGELOG.md` written.
 3. The checks below are done on that version, packed (`pnpm pack`).
-4. Merging the pull request publishes it to npm, with provenance (`pnpm run release`:
-   build, `lint:package`, `changeset publish`).
+4. Merging the pull request makes `main` a release. The workflow publishes its version to
+   npm if npm has not got it (`pnpm run release`: build, `lint:package`, `npm publish`,
+   with provenance), then creates the tag `pageturn@<version>` and its GitHub release,
+   with the version's section of `CHANGELOG.md`.
 
-Once, before the first: an npm automation token as the repository's `NPM_TOKEN` secret;
-`main` protected so that only a pull request with a green CI is merged into it.
+npm trusts the workflow: Trusted Publishing is set on npmjs.com (package settings,
+GitHub Actions, `Androlax2/pageturn`, `release.yml`), and no npm token exists anywhere.
+`main` is protected so that only a pull request with a green CI is merged into it.
 
 ## Automated, first
 
 - [ ] `pnpm run check`, `pnpm run size`, `pnpm run lint:package` and `pnpm run test`
       pass, and CI is green in all three browsers.
-- [ ] `npm view pageturn` still answers 404, or the name is ours.
 
 ## Back from the back/forward cache
 
